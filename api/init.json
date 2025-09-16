@@ -1,0 +1,257 @@
+{
+  "homeInfo": {
+    "title": "首页",
+    "href": "page/home.html"
+  },
+  "logoInfo": {
+    "title": "学生考勤管理",
+    "image": "images/ZBDX.jpg",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+      "title": "常规管理",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "首页",
+          "href": "/page/home.html",
+          "icon": "fa fa-home",
+          "target": "_self"
+        },
+        {
+          "title": "基础数据管理",
+          "href": "",
+          "icon": "fa fa-group",
+          "target": "_self",
+          "child": [
+          {
+            "title": "维护学生基础信息",
+            "href": "A/weihu.html",
+            "icon": "fa fa-plus-square-o",
+            "target": "_self"
+          }, {
+            "title": "管理教师信息",
+            "href": "A/teacher-management.html",
+            "icon": "fa fa-search",
+            "target": "_self"
+          }, {
+            "title": "配置班级与课程",
+            "href": "A/class-course.html",
+            "icon": "fa fa-search",
+            "target": "_self"
+          }, {
+            "title": "数据批量操作",
+            "href": "A/data-batch.html",
+            "icon": "fa fa-search",
+            "target": "_self"
+          }
+        ]
+        },
+        {
+          "title": "考勤规则设置",
+          "href": "",
+          "icon": "fa fa-institution",
+          "target": "_self",
+          "child": [
+            {
+              "title": "自定义考勤类型",
+              "href": "B/attendence-type.html",
+              "icon": "fa fa-plus-square-o",
+              "target": "_self"
+            }, {
+              "title": "配置考勤时段",
+              "href": "B/attendence-time.html",
+              "icon": "fa fa-plus-circle",
+              "target": "_self"
+            }, {
+              "title": "设定请假规则",
+              "href": "B/leave-rules.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }, {
+              "title": "考勤异常阈值",
+              "href": "B/attendence-th.html",
+              "icon": "fa fa-search-plus",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "日常考勤记录",
+          "href": "",
+          "icon": "fa fa-male",
+          "target": "_self",
+          "child": [
+            {
+              "title": "多方式签到",
+              "href": "C/qiandao.html",
+              "icon": "fa fa-plus-circle",
+              "target": "_self"
+            }, {
+              "title": "实时记录异常",
+              "href": "C/jilu.html",
+              "icon": "fa fa-search-plus",
+              "target": "_self"
+            }, {
+              "title": "补签申请处理",
+              "href": "C/buqian.html",
+              "icon": "fa fa-bar-chart",
+              "target": "_self"
+            }, {
+              "title": "考勤记录同步",
+              "href": "C/jilutongbu.html",
+              "icon": "fa fa-bar-chart",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "请假审批",
+          "href": "",
+          "icon": "fa fa-trophy",
+          "target": "_self",
+          "child": [
+            {
+              "title": "学生发起请假",
+              "href": "D/student-jia.html",
+              "icon": "fa fa-plus-square-o",
+              "target": "_self"
+            }, {
+              "title": "多级审批流转",
+              "href": "D/shenpi.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }, {
+              "title": "请假状态跟踪",
+              "href": "D/state.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }, {
+              "title": "请假数据统计",
+              "href": "D/statistics.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "考勤数据统计",
+          "href": "",
+          "icon": "fa fa-paw",
+          "target": "_self",
+          "child": [
+            {
+              "title": "个人考勤报表",
+              "href": "E/baobiao.html",
+              "icon": "fa fa-plus-circle",
+              "target": "_self"
+            }, {
+              "title": "班级考勤分析",
+              "href": "E/fenxi.html",
+              "icon": "fa fa-search-plus",
+              "target": "_self"
+            }, {
+              "title": "课程考勤对比",
+              "href": "E/duibi.html",
+              "icon": "fa fa-bar-chart",
+              "target": "_self"
+            }, {
+              "title": "异常数据筛选",
+              "href": "E/shaixuan.html",
+              "icon": "fa fa-bar-chart",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "预警与通知",
+          "href": "",
+          "icon": "fa fa-eye",
+          "target": "_self",
+          "child": [
+            {
+              "title": "异常考勤提醒",
+              "href": "F/yichang.html",
+              "icon": "fa fa-plus-square-o",
+              "target": "_self"
+            }, {
+              "title": "请假审批通知",
+              "href": "F/tongzhi.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }, {
+              "title": "考勤截止提醒",
+              "href": "F/jiezhi.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }, {
+              "title": "学期末预警",
+              "href": "F/yujing.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }
+          ]
+        },{
+          "title": "权限管理",
+          "href": "",
+          "icon": "fa fa-eye",
+          "target": "_self",
+          "child": [
+            {
+              "title": "角色划分",
+              "href": "G/huafen.html",
+              "icon": "fa fa-plus-square-o",
+              "target": "_self"
+            }, {
+              "title": "权限分配",
+              "href": "G/fenpei.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }, {
+              "title": "账号管理",
+              "href": "G/guanli.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }, {
+              "title": "操作日志",
+              "href": "G/caozuo.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }
+          ]
+        },{
+          "title": "数据查询与导出",
+          "href": "",
+          "icon": "fa fa-eye",
+          "target": "_self",
+          "child": [
+            {
+              "title": "多维度查询",
+              "href": "H/duowei.html",
+              "icon": "fa fa-plus-square-o",
+              "target": "_self"
+            }, {
+              "title": "报表导出",
+              "href": "H/baobiao.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }, {
+              "title": "历史数据存档",
+              "href": "H/cundang.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }, {
+              "title": "数据可视化",
+              "href": "H/keshihua.html",
+              "icon": "fa fa-search",
+              "target": "_self"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
