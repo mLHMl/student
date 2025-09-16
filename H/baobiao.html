@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学生考勤管理系统 - 报表导出</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  
+  <!-- 配置Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            warning: '#FF7D00',
+            danger: '#F53F3F',
+            success: '#00B42A',
+            gray: {
+              100: '#F2F3F5',
+              200: '#E5E6EB',
+              300: '#C9CDD4',
+              400: '#86909C',
+              500: '#4E5969',
+              600: '#272E3B',
+              700: '#1D2129',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .transition-all-300 {
+        transition: all 300ms ease-in-out;
+      }
+      .stat-card-hover {
+        @apply hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300;
+      }
+      .badge-status {
+        @apply px-2 py-0.5 rounded-full text-xs font-medium;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-700 min-h-screen flex flex-col">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <!-- 左侧Logo和标题 -->
+        <div class="flex items-center space-x-3">
+          <div class="text-primary text-2xl">
+            <i class="fa fa-graduation-cap"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-semibold text-gray-700">学生考勤管理系统</h1>
+            <p class="text-xs text-gray-400">高效·精准·便捷</p>
+          </div>
+        </div>
+        
+        <!-- 右侧用户信息和操作 -->
+        <div class="flex items-center space-x-6">
+          <button class="text-gray-500 hover:text-primary transition-all-300 relative">
+            <i class="fa fa-bell-o"></i>
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-danger rounded-full text-white text-xs flex items-center justify-center">1</span>
+          </button>
+          <button class="text-gray-500 hover:text-primary transition-all-300">
+            <i class="fa fa-cog"></i>
+          </button>
+          <div class="flex items-center space-x-2">
+            <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+            <div>
+              <p class="text-sm font-medium">王主任</p>
+              <p class="text-xs text-gray-400">院系管理员</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体内容 -->
+  <main class="flex-1 container mx-auto px-4 py-6">
+    <!-- 面包屑导航 -->
+    <div class="text-sm mb-6">
+      <a href="#" class="text-gray-500 hover:text-primary">首页</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <a href="#" class="text-gray-500 hover:text-primary">数据中心</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <a href="#" class="text-gray-500 hover:text-primary">数据查询与导出</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <span class="text-primary">报表导出</span>
+    </div>
+    
+    <!-- 页面标题和控制区 -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div>
+        <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-700">报表导出</h2>
+        <p class="text-gray-400 mt-1">直观展示考勤数据统计分析结果，支持多维度数据洞察</p>
+      </div>
+      
+      <div class="mt-4 md:mt-0 flex flex-wrap items-center gap-3">
+        <!-- 时间维度选择 -->
+        <div class="bg-white rounded-md shadow-sm border border-gray-200">
+          <div class="flex">
+            <button class="px-4 py-2 text-sm border-r border-gray-200 hover:bg-gray-50 transition-all-300">日</button>
+            <button class="px-4 py-2 text-sm border-r border-gray-200 bg-primary text-white">周</button>
+            <button class="px-4 py-2 text-sm border-r border-gray-200 hover:bg-gray-50 transition-all-300">月</button>
+            <button class="px-4 py-2 text-sm hover:bg-gray-50 transition-all-300">学期</button>
+          </div>
+        </div>
+        
+        <!-- 数据范围选择 -->
+        <div class="relative">
+          <select class="block pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all-300 appearance-none bg-white text-sm">
+            <option value="school">全校数据</option>
+            <option value="department">会计学院</option>
+            <option value="grade">23级</option>
+            <option value="class">23会计1班</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+          </div>
+        </div>
+        
+        <!-- 导出按钮 -->
+        <button class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-all-300 flex items-center text-sm">
+          <i class="fa fa-download mr-2"></i>导出报表
+        </button>
+      </div>
+    </div>
+    
+    <!-- 核心指标卡片 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div class="bg-white rounded-lg card-shadow p-5 stat-card-hover">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">总出勤率</p>
+            <h3 class="text-2xl font-bold mt-1 flex items-center">
+              96.3%
+              <span class="ml-2 text-success text-xs flex items-center">
+                <i class="fa fa-arrow-up mr-1"></i>0.7%
+              </span>
+            </h3>
+            <p class="text-gray-500 text-xs mt-2">较上周提升0.7个百分点</p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success">
+            <i class="fa fa-check-circle"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg card-shadow p-5 stat-card-hover">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">迟到人次</p>
+            <h3 class="text-2xl font-bold mt-1 flex items-center">
+              124
+              <span class="ml-2 text-warning text-xs flex items-center">
+                <i class="fa fa-arrow-up mr-1"></i>5.2%
+              </span>
+            </h3>
+            <p class="text-gray-500 text-xs mt-2">较上周增加6人次</p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+            <i class="fa fa-clock-o"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg card-shadow p-5 stat-card-hover">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">旷课人次</p>
+            <h3 class="text-2xl font-bold mt-1 flex items-center">
+              38
+              <span class="ml-2 text-success text-xs flex items-center">
+                <i class="fa fa-arrow-down mr-1"></i>12.8%
+              </span>
+            </h3>
+            <p class="text-gray-500 text-xs mt-2">较上周减少5人次</p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+            <i class="fa fa-times-circle"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg card-shadow p-5 stat-card-hover">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-gray-500 text-sm">请假人次</p>
+            <h3 class="text-2xl font-bold mt-1 flex items-center">
+              86
+              <span class="ml-2 text-success text-xs flex items-center">
+                <i class="fa fa-arrow-down mr-1"></i>8.5%
+              </span>
+            </h3>
+            <p class="text-gray-500 text-xs mt-2">较上周减少8人次</p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+            <i class="fa fa-calendar"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 主要图表区域 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <!-- 出勤率趋势图 -->
+      <div class="bg-white rounded-lg card-shadow p-5 lg:col-span-2">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="font-semibold">出勤率趋势</h3>
+          <div class="flex space-x-2">
+            <button class="px-3 py-1 text-xs bg-primary text-white rounded-md">周</button>
+            <button class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-all-300">月</button>
+            <button class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-all-300">学期</button>
+          </div>
+        </div>
+        <div class="h-80">
+          <canvas id="attendanceRateChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- 考勤类型占比 -->
+      <div class="bg-white rounded-lg card-shadow p-5">
+        <h3 class="font-semibold mb-5">考勤类型占比</h3>
+        <div class="h-80 flex items-center justify-center">
+          <canvas id="attendanceTypeChart"></canvas>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-4">
+          <div class="flex items-center">
+            <span class="w-3 h-3 rounded-full bg-success mr-2"></span>
+            <span class="text-sm text-gray-600">正常 (89.6%)</span>
+          </div>
+          <div class="flex items-center">
+            <span class="w-3 h-3 rounded-full bg-warning mr-2"></span>
+            <span class="text-sm text-gray-600">迟到 (5.2%)</span>
+          </div>
+          <div class="flex items-center">
+            <span class="w-3 h-3 rounded-full bg-danger mr-2"></span>
+            <span class="text-sm text-gray-600">旷课 (1.6%)</span>
+          </div>
+          <div class="flex items-center">
+            <span class="w-3 h-3 rounded-full bg-secondary mr-2"></span>
+            <span class="text-sm text-gray-600">请假 (3.6%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 次要图表区域 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- 各院系出勤率对比 -->
+      <div class="bg-white rounded-lg card-shadow p-5">
+        <h3 class="font-semibold mb-5">各院系出勤率对比</h3>
+        <div class="h-72">
+          <canvas id="departmentComparisonChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- 请假类型分析 -->
+      <div class="bg-white rounded-lg card-shadow p-5">
+        <h3 class="font-semibold mb-5">请假类型分析</h3>
+        <div class="h-72">
+          <canvas id="leaveTypeChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 问题班级和学生列表 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- 请假TOP班级 -->
+      <div class="bg-white rounded-lg card-shadow p-5">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="font-semibold">请假TOP 5班级</h3>
+          <a href="#" class="text-primary text-sm hover:underline">查看全部</a>
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all-300">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold mr-3">1</div>
+              <div>
+                <p class="font-medium">23计算机3班</p>
+                <p class="text-xs text-gray-500">32人次请假</p>
+              </div>
+            </div>
+            <div class="w-24 bg-gray-100 rounded-full h-2">
+              <div class="bg-primary h-2 rounded-full" style="width: 85%"></div>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all-300">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold mr-3">2</div>
+              <div>
+                <p class="font-medium">22金融2班</p>
+                <p class="text-xs text-gray-500">28人次请假</p>
+              </div>
+            </div>
+            <div class="w-24 bg-gray-100 rounded-full h-2">
+              <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all-300">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold mr-3">3</div>
+              <div>
+                <p class="font-medium">23会计1班</p>
+                <p class="text-xs text-gray-500">25人次请假</p>
+              </div>
+            </div>
+            <div class="w-24 bg-gray-100 rounded-full h-2">
+              <div class="bg-primary h-2 rounded-full" style="width: 68%"></div>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all-300">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold mr-3">4</div>
+              <div>
+                <p class="font-medium">21国贸1班</p>
+                <p class="text-xs text-gray-500">20人次请假</p>
+              </div>
+            </div>
+            <div class="w-24 bg-gray-100 rounded-full h-2">
+              <div class="bg-primary h-2 rounded-full" style="width: 55%"></div>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all-300">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold mr-3">5</div>
+              <div>
+                <p class="font-medium">23市场营销班</p>
+                <p class="text-xs text-gray-500">18人次请假</p>
+              </div>
+            </div>
+            <div class="w-24 bg-gray-100 rounded-full h-2">
+              <div class="bg-primary h-2 rounded-full" style="width: 48%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 考勤异常TOP学生 -->
+      <div class="bg-white rounded-lg card-shadow p-5">
+        <div class="flex justify-between items-center mb-5">
+          <h3 class="font-semibold">考勤异常TOP 5学生</h3>
+          <a href="#" class="text-primary text-sm hover:underline">查看全部</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">排名</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">学号</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">姓名</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">班级</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">异常次数</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">主要类型</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr class="hover:bg-gray-50 transition-all-300">
+                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                  <span class="w-6 h-6 rounded-full bg-danger/10 flex items-center justify-center text-danger text-xs font-semibold inline-flex">1</span>
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">202304567</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">赵小明</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">23计算机3班</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-danger">12</td>
+                <td class="px-3 py-3 whitespace-nowrap">
+                  <span class="badge-status bg-danger/10 text-danger">旷课</span>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-all-300">
+                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                  <span class="w-6 h-6 rounded-full bg-danger/10 flex items-center justify-center text-danger text-xs font-semibold inline-flex">2</span>
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">202301234</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">李晓华</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">23会计1班</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-danger">9</td>
+                <td class="px-3 py-3 whitespace-nowrap">
+                  <span class="badge-status bg-warning/10 text-warning">迟到</span>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-all-300">
+                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                  <span class="w-6 h-6 rounded-full bg-danger/10 flex items-center justify-center text-danger text-xs font-semibold inline-flex">3</span>
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">202207890</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">王建国</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">22金融2班</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-danger">8</td>
+                <td class="px-3 py-3 whitespace-nowrap">
+                  <span class="badge-status bg-danger/10 text-danger">旷课</span>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-all-300">
+                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                  <span class="w-6 h-6 rounded-full bg-danger/10 flex items-center justify-center text-danger text-xs font-semibold inline-flex">4</span>
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">202305678</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">陈思思</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">23市场营销班</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-danger">7</td>
+                <td class="px-3 py-3 whitespace-nowrap">
+                  <span class="badge-status bg-secondary/10 text-secondary">病假</span>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-all-300">
+                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                  <span class="w-6 h-6 rounded-full bg-danger/10 flex items-center justify-center text-danger text-xs font-semibold inline-flex">5</span>
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">202103456</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">刘文静</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm">21国贸1班</td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-danger">6</td>
+                <td class="px-3 py-3 whitespace-nowrap">
+                  <span class="badge-status bg-gray-200 text-gray-700">事假</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 历史数据趋势 -->
+    <div class="bg-white rounded-lg card-shadow p-5 mb-6">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="font-semibold">历史数据趋势对比</h3>
+        <div class="flex items-center">
+          <label class="text-sm text-gray-500 mr-2">学年：</label>
+          <select class="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary">
+            <option>2023-2024学年</option>
+            <option selected>2022-2023学年</option>
+            <option>2021-2022学年</option>
+          </select>
+        </div>
+      </div>
+      <div class="h-72">
+        <canvas id="historicalTrendChart"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-white border-t border-gray-200 py-6 mt-6">
+    <div class="container mx-auto px-4">
+      <div class="text-center text-sm text-gray-500">
+        <p>© 2023 学生考勤管理系统 版权所有</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 导出报表模态框 (默认隐藏) -->
+  <div id="exportReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg w-full max-w-md overflow-hidden">
+      <div class="p-6 border-b border-gray-200">
+        <h3 class="text-lg font-semibold flex items-center">
+          <i class="fa fa-download text-primary mr-2"></i>导出报表
+        </h3>
+      </div>
+      
+      <div class="p-6">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">报表类型</label>
+          <select class="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all-300 appearance-none bg-white">
+            <option value="summary">考勤汇总报表</option>
+            <option value="trend">趋势分析报表</option>
+            <option value="department">院系对比报表</option>
+            <option value="problem">问题学生报表</option>
+            <option value="all">完整数据报表</option>
+          </select>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">导出格式</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="border border-gray-300 rounded-md p-4 flex flex-col items-center cursor-pointer hover:border-primary transition-all-300">
+              <i class="fa fa-file-excel-o text-2xl text-success mb-2"></i>
+              <span class="text-sm">Excel</span>
+              <input type="radio" name="reportFormat" value="excel" class="hidden" checked>
+            </label>
+            <label class="border border-gray-300 rounded-md p-4 flex flex-col items-center cursor-pointer hover:border-primary transition-all-300">
+              <i class="fa fa-file-pdf-o text-2xl text-danger mb-2"></i>
+              <span class="text-sm">PDF</span>
+              <input type="radio" name="reportFormat" value="pdf" class="hidden">
+            </label>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <label class="flex items-center">
+            <input type="checkbox" checked id="includeCharts" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+            <span class="ml-2 text-sm text-gray-700">
+              包含图表
+            </span>
+          </label>
+        </div>
+        
+        <div>
+          <label class="flex items-center">
+            <input type="checkbox" id="includeData" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+            <span class="ml-2 text-sm text-gray-700">
+              包含详细数据
+            </span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="p-4 bg-gray-50 flex justify-end space-x-3">
+        <button id="cancelReportExport" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-all-300">
+          取消
+        </button>
+        <button id="confirmReportExport" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-all-300">
+          确认导出
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 页面加载完成后初始化所有图表
+    document.addEventListener('DOMContentLoaded', function() {
+      // 1. 出勤率趋势图
+      const rateCtx = document.getElementById('attendanceRateChart').getContext('2d');
+      const rateChart = new Chart(rateCtx, {
+        type: 'line',
+        data: {
+          labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+          datasets: [{
+            label: '出勤率',
+            data: [95.2, 94.8, 96.5, 97.1, 95.8, 92.3, 89.7],
+            borderColor: '#165DFF',
+            backgroundColor: 'rgba(22, 93, 255, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#165DFF',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `出勤率: ${context.raw}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 85,
+              max: 100,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // 2. 考勤类型占比图
+      const typeCtx = document.getElementById('attendanceTypeChart').getContext('2d');
+      const typeChart = new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['正常', '迟到', '旷课', '请假'],
+          datasets: [{
+            data: [89.6, 5.2, 1.6, 3.6],
+            backgroundColor: [
+              '#00B42A',
+              '#FF7D00',
+              '#F53F3F',
+              '#36CFC9'
+            ],
+            borderWidth: 0,
+            hoverOffset: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.label}: ${context.raw}%`;
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // 3. 各院系出勤率对比图
+      const deptCtx = document.getElementById('departmentComparisonChart').getContext('2d');
+      const deptChart = new Chart(deptCtx, {
+        type: 'bar',
+        data: {
+          labels: ['会计学院', '金融学院', '管理学院', '计算机学院', '外国语学院'],
+          datasets: [{
+            label: '出勤率',
+            data: [97.2, 96.8, 95.5, 94.3, 98.1],
+            backgroundColor: '#165DFF',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `出勤率: ${context.raw}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 90,
+              max: 100,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // 4. 请假类型分析图
+      const leaveCtx = document.getElementById('leaveTypeChart').getContext('2d');
+      const leaveChart = new Chart(leaveCtx, {
+        type: 'pie',
+        data: {
+          labels: ['病假', '事假', '公假', '其他'],
+          datasets: [{
+            data: [58, 32, 7, 3],
+            backgroundColor: [
+              '#36CFC9',
+              '#86909C',
+              '#165DFF',
+              '#C9CDD4'
+            ],
+            borderWidth: 0,
+            hoverOffset: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.label}: ${context.raw}人次`;
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // 5. 历史数据趋势对比图
+      const historicalCtx = document.getElementById('historicalTrendChart').getContext('2d');
+      const historicalChart = new Chart(historicalCtx, {
+        type: 'line',
+        data: {
+          labels: ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周', '第9周', '第10周', '第11周', '第12周'],
+          datasets: [
+            {
+              label: '本学年',
+              data: [94.2, 95.1, 94.8, 95.5, 96.3, 95.9, 96.5, 96.8, 96.3, 95.7, 96.1, 96.3],
+              borderColor: '#165DFF',
+              tension: 0.3,
+              borderWidth: 2,
+              pointBackgroundColor: '#165DFF',
+              pointRadius: 3
+            },
+            {
+              label: '上一学年',
+              data: [92.5, 93.1, 92.8, 93.5, 93.2, 92.9, 93.3, 93.1, 92.7, 92.3, 92.8, 92.5],
+              borderColor: '#86909C',
+              tension: 0.3,
+              borderWidth: 2,
+              borderDash: [5, 5],
+              pointBackgroundColor: '#86909C',
+              pointRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}出勤率: ${context.raw}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 90,
+              max: 100,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // 导出报表模态框控制
+      const exportButton = document.querySelector('button:has(.fa-download)');
+      const reportModal = document.getElementById('exportReportModal');
+      const cancelExport = document.getElementById('cancelReportExport');
+      const confirmExport = document.getElementById('confirmReportExport');
+      
+      exportButton.addEventListener('click', function() {
+        reportModal.classList.remove('hidden');
+      });
+      
+      function closeReportModal() {
+        reportModal.classList.add('hidden');
+      }
+      
+      cancelExport.addEventListener('click', closeReportModal);
+      
+      confirmExport.addEventListener('click', function() {
+        const format = document.querySelector('input[name="reportFormat"]:checked').value;
+        alert(`报表导出已开始，格式：${format === 'excel' ? 'Excel' : 'PDF'}`);
+        closeReportModal();
+      });
+      
+      // 点击模态框外部关闭
+      reportModal.addEventListener('click', function(e) {
+        if (e.target === reportModal) {
+          closeReportModal();
+        }
+      });
+      
+      // 时间维度切换功能
+      const timeButtons = document.querySelectorAll('.bg-white.rounded-md.shadow-sm.border button');
+      timeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // 移除所有按钮的活跃状态
+          timeButtons.forEach(btn => {
+            btn.classList.remove('bg-primary', 'text-white');
+            btn.classList.add('hover:bg-gray-50');
+          });
+          
+          // 设置当前按钮为活跃状态
+          this.classList.remove('hover:bg-gray-50');
+          this.classList.add('bg-primary', 'text-white');
+          
+          // 在实际应用中，这里会更新所有图表的时间维度数据
+          alert(`已切换至${this.textContent}维度数据视图`);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+    

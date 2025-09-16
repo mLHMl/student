@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史数据存档 - 学校考勤管理系统</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 引入SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E40AF', // 深蓝色主色调
+                        secondary: '#3B82F6', // 辅助色
+                        success: '#10B981', // 成功状态色
+                        warning: '#F59E0B', // 警告状态色
+                        danger: '#EF4444', // 危险/删除状态色
+                        neutral: '#64748B', // 中性色
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .transition-bg {
+                transition: background-color 0.3s ease;
+            }
+            .transition-transform {
+                transition: transform 0.2s ease;
+            }
+            .shadow-card {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800">
+    <!-- 顶部导航栏 -->
+    <header class="bg-primary text-white shadow-md fixed w-full z-10 top-0">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- 系统Logo和名称 -->
+                <div class="flex items-center space-x-3">
+                    <i class="fa fa-graduation-cap text-2xl"></i>
+                    <h1 class="text-xl font-bold">学校考勤管理系统</h1>
+                </div>
+                
+                <!-- 用户信息和操作 -->
+                <div class="flex items-center space-x-6">
+                    <button class="hover:text-gray-200 transition-bg">
+                        <i class="fa fa-bell-o"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                        <span>张老师</span>
+                        <i class="fa fa-angle-down text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- 页面标题和面包屑 -->
+        <div class="mb-8">
+            <div class="flex flex-wrap justify-between items-center mb-4">
+                <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">历史数据存档</h2>
+                <div class="flex space-x-3 mt-2 sm:mt-0">
+                    <button id="batch-export-btn" class="bg-secondary hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center transition-bg">
+                        <i class="fa fa-download mr-2"></i>
+                        <span>批量导出</span>
+                    </button>
+                    <button id="backup-log-btn" class="bg-white border border-gray-300 hover:bg-gray-100 px-4 py-2 rounded-md flex items-center transition-bg">
+                        <i class="fa fa-history mr-2"></i>
+                        <span>备份日志</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 面包屑导航 -->
+            <nav class="text-sm text-gray-500">
+                <a href="#" class="hover:text-primary">首页</a>
+                <span class="mx-2">/</span>
+                <a href="#" class="hover:text-primary">数据查询与导出</a>
+                <span class="mx-2">/</span>
+                <span class="text-primary">历史数据存档</span>
+            </nav>
+        </div>
+        
+        <!-- 筛选查询区 -->
+        <div class="bg-white rounded-lg shadow-card p-6 mb-8">
+            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                <i class="fa fa-filter text-primary mr-2"></i>
+                数据筛选
+            </h3>
+            
+            <form id="filter-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 学年选择 -->
+                <div>
+                    <label for="school-year" class="block text-sm font-medium text-gray-700 mb-1">学年</label>
+                    <select id="school-year" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                        <option value="">全部学年</option>
+                        <option value="2023-2024">2023-2024学年</option>
+                        <option value="2022-2023">2022-2023学年</option>
+                        <option value="2021-2022">2021-2022学年</option>
+                        <option value="2020-2021">2020-2021学年</option>
+                        <option value="2019-2020">2019-2020学年</option>
+                    </select>
+                </div>
+                
+                <!-- 学期选择 -->
+                <div>
+                    <label for="semester" class="block text-sm font-medium text-gray-700 mb-1">学期</label>
+                    <select id="semester" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                        <option value="">全部学期</option>
+                        <option value="1">1学期</option>
+                        <option value="2">2学期</option>
+                        <option value="3">暑期小学期</option>
+                    </select>
+                </div>
+                
+                <!-- 院系/部门 -->
+                <div>
+                    <label for="department" class="block text-sm font-medium text-gray-700 mb-1">院系/部门</label>
+                    <select id="department" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                        <option value="">全部院系</option>
+                        <option value="accounting">会计学院</option>
+                        <option value="computer">计算机学院</option>
+                        <option value="foreign">外国语学院</option>
+                        <option value="business">商学院</option>
+                        <option value="law">法学院</option>
+                    </select>
+                </div>
+                
+                <!-- 数据类型 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">数据类型</label>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="type-original" name="data-type" value="original" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" checked>
+                            <label for="type-original" class="ml-2 text-sm text-gray-700">考勤原始记录</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="type-class" name="data-type" value="class" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" checked>
+                            <label for="type-class" class="ml-2 text-sm text-gray-700">班级汇总表</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="type-college" name="data-type" value="college" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" checked>
+                            <label for="type-college" class="ml-2 text-sm text-gray-700">院系统计报表</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 数据状态 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">数据状态</label>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input type="radio" id="status-archived" name="data-status" value="archived" class="w-4 h-4 text-primary focus:ring-primary border-gray-300" checked>
+                            <label for="status-archived" class="ml-2 text-sm text-gray-700">已归档</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="status-backing" name="data-status" value="backing" class="w-4 h-4 text-primary focus:ring-primary border-gray-300">
+                            <label for="status-backing" class="ml-2 text-sm text-gray-700">备份中</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="status-cleanup" name="data-status" value="cleanup" class="w-4 h-4 text-primary focus:ring-primary border-gray-300">
+                            <label for="status-cleanup" class="ml-2 text-sm text-gray-700">待清理</label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- 按钮区域 -->
+            <div class="flex justify-end space-x-3 mt-6">
+                <button id="reset-filter" class="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-bg">
+                    重置
+                </button>
+                <button id="apply-filter" class="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-bg">
+                    查询
+                </button>
+            </div>
+        </div>
+        
+        <!-- 数据统计概览 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">总存档数</p>
+                        <h4 class="text-2xl font-bold mt-1">24</h4>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                        <i class="fa fa-archive text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    <span class="text-success"><i class="fa fa-arrow-up"></i> 8.2%</span>
+                    <span class="text-gray-500 ml-1">较上学期</span>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">总数据量</p>
+                        <h4 class="text-2xl font-bold mt-1">1.2M</h4>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-success">
+                        <i class="fa fa-database text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    <span class="text-success"><i class="fa fa-arrow-up"></i> 12.5%</span>
+                    <span class="text-gray-500 ml-1">较上学期</span>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">本月访问</p>
+                        <h4 class="text-2xl font-bold mt-1">156</h4>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                        <i class="fa fa-eye text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    <span class="text-danger"><i class="fa fa-arrow-down"></i> 3.1%</span>
+                    <span class="text-gray-500 ml-1">较上月</span>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">待清理数据</p>
+                        <h4 class="text-2xl font-bold mt-1">3</h4>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-warning">
+                        <i class="fa fa-exclamation-triangle text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    <span class="text-danger"><i class="fa fa-arrow-up"></i> 3</span>
+                    <span class="text-gray-500 ml-1">较上月</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 数据存档列表 -->
+        <div class="bg-white rounded-lg shadow-card overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex flex-wrap justify-between items-center">
+                    <h3 class="text-lg font-semibold flex items-center">
+                        <i class="fa fa-list-alt text-primary mr-2"></i>
+                        历史数据存档列表
+                    </h3>
+                    
+                    <!-- 表格功能区 -->
+                    <div class="flex items-center space-x-3 mt-3 sm:mt-0">
+                        <div class="relative">
+                            <input type="text" placeholder="搜索存档名称..." class="pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm w-full sm:w-64">
+                            <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                        
+                        <button id="customize-columns" class="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-bg">
+                            <i class="fa fa-cog text-gray-600"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 表格 -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 w-12">
+                                <input type="checkbox" id="select-all" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">序号</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">存档名称</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">学年/学期</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数据量</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">存档时间</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">存储位置</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- 表格数据行 -->
+                        <tr class="hover:bg-gray-50 transition-bg">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" class="archive-select w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" data-id="1">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">2022-2023学年1学期 全校考勤原始记录</div>
+                                <div class="text-xs text-gray-500 mt-1">包含全校28个班级的原始考勤记录</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2022-2023 / 1学期
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                32,450条记录
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2023-01-15 09:30
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                本地服务器
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    已归档
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-primary hover:text-primary/80 mr-3 view-details" data-id="1">查看详情</button>
+                                <button class="text-secondary hover:text-secondary/80 mr-3 download-archive" data-id="1">下载</button>
+                                <button class="text-purple-600 hover:text-purple-500 mr-3 generate-report" data-id="1">生成报表</button>
+                                <button class="text-danger hover:text-danger/80 delete-archive" data-id="1">删除</button>
+                            </td>
+                        </tr>
+                        
+                        <tr class="hover:bg-gray-50 transition-bg">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" class="archive-select w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" data-id="2">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">2022-2023学年1学期 会计学院班级汇总表</div>
+                                <div class="text-xs text-gray-500 mt-1">会计学院5个班级的考勤汇总数据</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2022-2023 / 1学期
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                5,280条记录
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2023-01-16 14:20
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                云备份
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    已归档
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-primary hover:text-primary/80 mr-3 view-details" data-id="2">查看详情</button>
+                                <button class="text-secondary hover:text-secondary/80 mr-3 download-archive" data-id="2">下载</button>
+                                <button class="text-purple-600 hover:text-purple-500 mr-3 generate-report" data-id="2">生成报表</button>
+                                <button class="text-danger hover:text-danger/80 delete-archive" data-id="2">删除</button>
+                            </td>
+                        </tr>
+                        
+                        <tr class="hover:bg-gray-50 transition-bg">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" class="archive-select w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" data-id="3">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">2022-2023学年2学期 计算机学院统计报表</div>
+                                <div class="text-xs text-gray-500 mt-1">计算机学院4个班级的考勤统计分析</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2022-2023 / 2学期
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                4,120条记录
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2023-07-05 10:15
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                本地服务器
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    待清理
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-primary hover:text-primary/80 mr-3 view-details" data-id="3">查看详情</button>
+                                <button class="text-secondary hover:text-secondary/80 mr-3 download-archive" data-id="3">下载</button>
+                                <button class="text-purple-600 hover:text-purple-500 mr-3 generate-report" data-id="3">生成报表</button>
+                                <button class="text-danger hover:text-danger/80 delete-archive" data-id="3">删除</button>
+                            </td>
+                        </tr>
+                        
+                        <tr class="hover:bg-gray-50 transition-bg">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" class="archive-select w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" data-id="4">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">4</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">2021-2022学年2学期 全校考勤原始记录</div>
+                                <div class="text-xs text-gray-500 mt-1">包含全校26个班级的原始考勤记录</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2021-2022 / 2学期
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                29,870条记录
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2022-07-10 16:40
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                云备份
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    已归档
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-primary hover:text-primary/80 mr-3 view-details" data-id="4">查看详情</button>
+                                <button class="text-secondary hover:text-secondary/80 mr-3 download-archive" data-id="4">下载</button>
+                                <button class="text-purple-600 hover:text-purple-500 mr-3 generate-report" data-id="4">生成报表</button>
+                                <button class="text-danger hover:text-danger/80 delete-archive" data-id="4">删除</button>
+                            </td>
+                        </tr>
+                        
+                        <tr class="hover:bg-gray-50 transition-bg">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" class="archive-select w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" data-id="5">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">2023-2024学年1学期 商学院班级汇总表</div>
+                                <div class="text-xs text-gray-500 mt-1">商学院6个班级的考勤汇总数据</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2023-2024 / 1学期
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                6,350条记录
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                2024-01-20 11:05
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                本地服务器
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    备份中
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button class="text-primary hover:text-primary/80 mr-3 view-details" data-id="5">查看详情</button>
+                                <button class="text-secondary hover:text-secondary/80 mr-3 download-archive" data-id="5" disabled>下载</button>
+                                <button class="text-purple-600 hover:text-purple-500 mr-3 generate-report" data-id="5" disabled>生成报表</button>
+                                <button class="text-danger hover:text-danger/80 delete-archive" data-id="5" disabled>删除</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 分页 -->
+            <div class="px-6 py-4 bg-white border-t border-gray-200 flex flex-wrap justify-between items-center">
+                <div class="text-sm text-gray-500 mb-4 sm:mb-0">
+                    显示 <span class="font-medium">1</span> 到 <span class="font-medium">5</span> 条，共 <span class="font-medium">24</span> 条记录
+                </div>
+                <div class="flex space-x-1">
+                    <button class="px-3 py-1 border border-gray-300 rounded-md bg-gray-50 text-gray-500" disabled>
+                        <i class="fa fa-angle-left"></i>
+                    </button>
+                    <button class="px-3 py-1 border border-primary bg-primary text-white rounded-md">1</button>
+                    <button class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50">2</button>
+                    <button class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50">3</button>
+                    <button class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50">4</button>
+                    <button class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50">5</button>
+                    <button class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50">
+                        <i class="fa fa-angle-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部说明区 -->
+        <div class="bg-white rounded-lg shadow-card p-6">
+            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                <i class="fa fa-info-circle text-primary mr-2"></i>
+                存档管理说明
+            </h3>
+            
+            <div class="space-y-4 text-gray-700">
+                <div class="flex items-start">
+                    <i class="fa fa-check-circle text-success mt-1 mr-3"></i>
+                    <p>系统自动在每学期结束后7天内归档当学期数据，保留期限为5年。</p>
+                </div>
+                
+                <div class="flex items-start">
+                    <i class="fa fa-exclamation-circle text-warning mt-1 mr-3"></i>
+                    <p>距过期不足30天的数据将标红提醒，过期数据将自动脱敏后留存核心统计信息。</p>
+                </div>
+                
+                <div class="flex items-start">
+                    <i class="fa fa-file-text-o text-primary mt-1 mr-3"></i>
+                    <p>
+                        <a href="#" class="text-primary hover:underline">查看历史数据管理规范</a>
+                        <span class="ml-2">|</span>
+                        <a href="#" class="text-primary hover:underline ml-2">数据备份与恢复指南</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p>© 2024 学校考勤管理系统 版权所有</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-gray-300 transition-bg">帮助中心</a>
+                    <a href="#" class="hover:text-gray-300 transition-bg">联系我们</a>
+                    <a href="#" class="hover:text-gray-300 transition-bg">隐私政策</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 数据详情弹窗 -->
+    <div id="details-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="text-xl font-bold text-gray-800">数据存档详情</h3>
+                <button id="close-details" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <div id="archive-details-content">
+                    <!-- 详情内容将通过JavaScript动态填充 -->
+                </div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3 sticky bottom-0 bg-white">
+                <button id="close-details-btn" class="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-bg">
+                    关闭
+                </button>
+                <button id="download-from-details" class="px-6 py-2 bg-secondary text-white rounded-md hover:bg-blue-700 transition-bg">
+                    <i class="fa fa-download mr-2"></i>下载数据
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 下载进度弹窗 -->
+    <div id="download-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <i class="fa fa-download text-secondary mr-2"></i>
+                    数据下载中
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span id="download-filename">2022-2023学年1学期 全校考勤原始记录</span>
+                        <span id="download-percentage">35%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="download-progress" class="bg-secondary h-2.5 rounded-full" style="width: 35%"></div>
+                    </div>
+                </div>
+                
+                <div class="text-sm text-gray-500 mb-4">
+                    <p>已下载: <span id="downloaded-size">128 MB</span> / <span id="total-size">365 MB</span></p>
+                    <p>预计剩余时间: <span id="download-time">02:45</span></p>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button id="pause-download" class="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-bg">
+                        <i class="fa fa-pause mr-2"></i>暂停
+                    </button>
+                    <button id="cancel-download" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-bg">
+                        <i class="fa fa-times mr-2"></i>取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 模拟存档数据
+        const archiveData = {
+            1: {
+                name: "2022-2023学年1学期 全校考勤原始记录",
+                schoolYear: "2022-2023",
+                semester: "1学期",
+                dataCount: "32,450条记录",
+                archiveTime: "2023-01-15 09:30",
+                storageLocation: "本地服务器",
+                status: "已归档",
+                archiveId: "ARC-20230115-001",
+                source: "系统自动备份",
+                fileSize: "365 MB",
+                classesCount: 28,
+                studentsCount: 1256,
+                coursesCount: 142,
+                checkTime: "2023-01-16 10:00",
+                checkResult: "完整",
+                accessLogs: [
+                    { user: "李老师", time: "2024-03-10 14:25" },
+                    { user: "王主任", time: "2024-02-18 09:40" },
+                    { user: "张老师", time: "2024-01-05 16:10" }
+                ]
+            },
+            2: {
+                name: "2022-2023学年1学期 会计学院班级汇总表",
+                schoolYear: "2022-2023",
+                semester: "1学期",
+                dataCount: "5,280条记录",
+                archiveTime: "2023-01-16 14:20",
+                storageLocation: "云备份",
+                status: "已归档",
+                archiveId: "ARC-20230116-002",
+                source: "手动备份",
+                fileSize: "87 MB",
+                classesCount: 5,
+                studentsCount: 215,
+                coursesCount: 28,
+                checkTime: "2023-01-17 11:30",
+                checkResult: "完整",
+                accessLogs: [
+                    { user: "赵老师", time: "2024-04-02 10:15" },
+                    { user: "张老师", time: "2024-03-20 15:40" }
+                ]
+            },
+            // 其他存档数据...
+        };
+        
+        // 当前选中的存档ID
+        let currentArchiveId = null;
+        
+        // DOM加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 全选/取消全选
+            const selectAllCheckbox = document.getElementById('select-all');
+            const archiveCheckboxes = document.querySelectorAll('.archive-select');
+            
+            selectAllCheckbox.addEventListener('change', function() {
+                archiveCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+            
+            // 查看详情按钮点击事件
+            const viewDetailsButtons = document.querySelectorAll('.view-details');
+            const detailsModal = document.getElementById('details-modal');
+            const closeDetailsButton = document.getElementById('close-details');
+            const closeDetailsBtn = document.getElementById('close-details-btn');
+            const archiveDetailsContent = document.getElementById('archive-details-content');
+            const downloadFromDetails = document.getElementById('download-from-details');
+            
+            viewDetailsButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    currentArchiveId = this.getAttribute('data-id');
+                    const archive = archiveData[currentArchiveId];
+                    
+                    if (archive) {
+                        // 填充详情内容
+                        archiveDetailsContent.innerHTML = `
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-3 text-gray-800">基础信息</h4>
+                                    <div class="space-y-3">
+                                        <div class="flex">
+                                            <span class="w-1/3 text-sm text-gray-500">存档名称:</span>
+                                            <span class="w-2/3 text-sm font-medium">${archive.name}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-1/3 text-sm text-gray-500">存档编号:</span>
+                                            <span class="w-2/3 text-sm font-medium">${archive.archiveId}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-1/3 text-sm text-gray-500">生成来源:</span>
+                                            <span class="w-2/3 text-sm font-medium">${archive.source}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-1/3 text-sm text-gray-500">占用空间:</span>
+                                            <span class="w-2/3 text-sm font-medium">${archive.fileSize}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-1/3 text-sm text-gray-500">存储位置:</span>
+                                            <span class="w-2/3 text-sm font-medium">${archive.storageLocation}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-3 text-gray-800">数据范围</h4>
+                                    <div class="space-y-3">
+                                        <div class="flex">
+                                            <span class="w-1/3 text-sm text-gray-500">学年/学期:</span>
+                                            <span class="w-2/3 text-sm font-medium">${archive.schoolYear} / ${archive.semester}</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-1/3 text-sm text-gray-500">涉及班级数:</span>
+                                            <span class="w-2/3 text-sm font-medium">${archive.classesCount} 个</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-1/3 text-sm text-gray-500">涉及学生数:</span>
+                                            <span class="w-2/3 text-sm font-medium">${archive.studentsCount} 人</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-1/3 text-sm text-gray-500">涉及课程数:</span>
+                                            <span class="w-2/3 text-sm font-medium">${archive.coursesCount} 门</span>
+                                        </div>
+                                        <div class="flex">
+                                            <span class="w-1/3 text-sm text-gray-500">数据状态:</span>
+                                            <span class="w-2/3 text-sm font-medium">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                    ${archive.status}
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-3 text-gray-800">数据完整性校验</h4>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex flex-wrap md:flex-nowrap md:justify-between md:items-center mb-2">
+                                        <div class="flex items-center mb-2 md:mb-0">
+                                            <i class="fa fa-check-circle text-success mr-2"></i>
+                                            <span class="text-sm font-medium">校验结果: ${archive.checkResult}</span>
+                                        </div>
+                                        <span class="text-sm text-gray-500">校验时间: ${archive.checkTime}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                        <div class="bg-success h-2 rounded-full" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 text-gray-800">最近访问记录</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作人员</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">访问时间</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作类型</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            ${archive.accessLogs.map(log => `
+                                                <tr>
+                                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">${log.user}</td>
+                                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">${log.time}</td>
+                                                    <td class="px-6 py-3 whitespace-nowrap">
+                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                            查看
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // 显示弹窗
+                        detailsModal.classList.remove('hidden');
+                    }
+                });
+            });
+            
+            // 关闭详情弹窗
+            closeDetailsButton.addEventListener('click', function() {
+                detailsModal.classList.add('hidden');
+            });
+            
+            closeDetailsBtn.addEventListener('click', function() {
+                detailsModal.classList.add('hidden');
+            });
+            
+            // 从详情弹窗下载
+            downloadFromDetails.addEventListener('click', function() {
+                if (currentArchiveId) {
+                    const archive = archiveData[currentArchiveId];
+                    if (archive) {
+                        showDownloadModal(archive);
+                        detailsModal.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // 下载按钮点击事件
+            const downloadButtons = document.querySelectorAll('.download-archive');
+            const downloadModal = document.getElementById('download-modal');
+            const cancelDownloadButton = document.getElementById('cancel-download');
+            const pauseDownloadButton = document.getElementById('pause-download');
+            
+            downloadButtons.forEach(button => {
+                if (!button.disabled) {
+                    button.addEventListener('click', function() {
+                        const archiveId = this.getAttribute('data-id');
+                        const archive = archiveData[archiveId];
+                        
+                        if (archive) {
+                            showDownloadModal(archive);
+                        }
+                    });
+                }
+            });
+            
+            // 显示下载弹窗并模拟下载进度
+            function showDownloadModal(archive) {
+                document.getElementById('download-filename').textContent = archive.name;
+                document.getElementById('downloaded-size').textContent = "0 MB";
+                document.getElementById('total-size').textContent = archive.fileSize;
+                document.getElementById('download-time').textContent = "计算中...";
+                
+                const progressBar = document.getElementById('download-progress');
+                const percentageText = document.getElementById('download-percentage');
+                
+                progressBar.style.width = "0%";
+                percentageText.textContent = "0%";
+                
+                downloadModal.classList.remove('hidden');
+                
+                // 模拟下载进度
+                let progress = 0;
+                const totalSizeMB = parseInt(archive.fileSize);
+                const interval = setInterval(() => {
+                    if (progress < 100) {
+                        progress += Math.floor(Math.random() * 5) + 1;
+                        if (progress > 100) progress = 100;
+                        
+                        progressBar.style.width = `${progress}%`;
+                        percentageText.textContent = `${progress}%`;
+                        
+                        const downloadedMB = Math.floor((progress / 100) * totalSizeMB);
+                        document.getElementById('downloaded-size').textContent = `${downloadedMB} MB`;
+                        
+                        // 估计剩余时间
+                        const remainingPercentage = 100 - progress;
+                        const remainingTimeSeconds = Math.floor((remainingPercentage / 10) * 10);
+                        const minutes = Math.floor(remainingTimeSeconds / 60);
+                        const seconds = remainingTimeSeconds % 60;
+                        document.getElementById('download-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        
+                        if (progress === 100) {
+                            clearInterval(interval);
+                            
+                            // 下载完成后显示提示
+                            setTimeout(() => {
+                                downloadModal.classList.add('hidden');
+                                Swal.fire({
+                                    title: '下载完成',
+                                    text: `${archive.name} 已成功下载到本地`,
+                                    icon: 'success',
+                                    confirmButtonText: '确定'
+                                });
+                            }, 1000);
+                        }
+                    }
+                }, 1000);
+                
+                // 取消下载
+                cancelDownloadButton.onclick = function() {
+                    clearInterval(interval);
+                    downloadModal.classList.add('hidden');
+                };
+                
+                // 暂停/继续下载
+                let isPaused = false;
+                pauseDownloadButton.onclick = function() {
+                    if (isPaused) {
+                        // 继续下载
+                        this.innerHTML = '<i class="fa fa-pause mr-2"></i>暂停';
+                        isPaused = false;
+                        
+                        const resumeInterval = setInterval(() => {
+                            if (progress < 100 && !isPaused) {
+                                progress += Math.floor(Math.random() * 5) + 1;
+                                if (progress > 100) progress = 100;
+                                
+                                progressBar.style.width = `${progress}%`;
+                                percentageText.textContent = `${progress}%`;
+                                
+                                const downloadedMB = Math.floor((progress / 100) * totalSizeMB);
+                                document.getElementById('downloaded-size').textContent = `${downloadedMB} MB`;
+                                
+                                // 估计剩余时间
+                                const remainingPercentage = 100 - progress;
+                                const remainingTimeSeconds = Math.floor((remainingPercentage / 10) * 10);
+                                const minutes = Math.floor(remainingTimeSeconds / 60);
+                                const seconds = remainingTimeSeconds % 60;
+                                document.getElementById('download-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                                
+                                if (progress === 100) {
+                                    clearInterval(resumeInterval);
+                                    
+                                    // 下载完成后显示提示
+                                    setTimeout(() => {
+                                        downloadModal.classList.add('hidden');
+                                        Swal.fire({
+                                            title: '下载完成',
+                                            text: `${archive.name} 已成功下载到本地`,
+                                            icon: 'success',
+                                            confirmButtonText: '确定'
+                                        });
+                                    }, 1000);
+                                }
+                            }
+                        }, 1000);
+                        
+                        // 更新取消按钮事件
+                        cancelDownloadButton.onclick = function() {
+                            clearInterval(resumeInterval);
+                            downloadModal.classList.add('hidden');
+                        };
+                    } else {
+                        // 暂停下载
+                        this.innerHTML = '<i class="fa fa-play mr-2"></i>继续';
+                        isPaused = true;
+                        clearInterval(interval);
+                    }
+                };
+            }
+            
+            // 删除按钮点击事件
+            const deleteButtons = document.querySelectorAll('.delete-archive');
+            
+            deleteButtons.forEach(button => {
+                if (!button.disabled) {
+                    button.addEventListener('click', function() {
+                        const archiveId = this.getAttribute('data-id');
+                        const archive = archiveData[archiveId];
+                        
+                        if (archive) {
+                            Swal.fire({
+                                title: '确认删除',
+                                text: `您确定要删除 ${archive.name} 吗？此操作不可撤销。`,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#d33',
+                                cancelButtonColor: '#3085d6',
+                                confirmButtonText: '删除',
+                                cancelButtonText: '取消'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // 模拟删除操作
+                                    Swal.fire(
+                                        '已删除',
+                                        `${archive.name} 已成功删除。`,
+                                        'success'
+                                    ).then(() => {
+                                        // 从表格中移除该行
+                                        const row = this.closest('tr');
+                                        row.classList.add('opacity-0');
+                                        row.style.transition = 'opacity 0.3s ease';
+                                        
+                                        setTimeout(() => {
+                                            row.remove();
+                                        }, 300);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            
+            // 生成报表按钮点击事件
+            const generateReportButtons = document.querySelectorAll('.generate-report');
+            
+            generateReportButtons.forEach(button => {
+                if (!button.disabled) {
+                    button.addEventListener('click', function() {
+                        const archiveId = this.getAttribute('data-id');
+                        const archive = archiveData[archiveId];
+                        
+                        if (archive) {
+                            Swal.fire({
+                                title: '报表生成中',
+                                text: `正在为 ${archive.name} 生成统计报表...`,
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                            
+                            // 模拟报表生成
+                            setTimeout(() => {
+                                Swal.close();
+                                Swal.fire({
+                                    title: '报表生成成功',
+                                    text: `${archive.name} 的统计报表已生成，是否立即下载？`,
+                                    icon: 'success',
+                                    showCancelButton: true,
+                                    confirmButtonText: '下载',
+                                    cancelButtonText: '稍后'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        // 模拟下载报表
+                                        showDownloadModal({
+                                            ...archive,
+                                            name: `${archive.name} - 统计报表`,
+                                            fileSize: "25 MB"
+                                        });
+                                    }
+                                });
+                            }, 2000);
+                        }
+                    });
+                }
+            });
+            
+            // 批量导出按钮点击事件
+            document.getElementById('batch-export-btn').addEventListener('click', function() {
+                const checkedArchives = document.querySelectorAll('.archive-select:checked');
+                
+                if (checkedArchives.length === 0) {
+                    Swal.fire({
+                        title: '提示',
+                        text: '请先选择要导出的数据存档',
+                        icon: 'info',
+                        confirmButtonText: '确定'
+                    });
+                    return;
+                }
+                
+                // 显示导出格式选择
+                Swal.fire({
+                    title: '选择导出格式',
+                    html: `
+                        <div class="flex justify-center space-x-6 mt-4">
+                            <button id="export-excel" class="flex flex-col items-center p-4 border-2 border-gray-200 rounded-lg hover:border-primary transition-colors">
+                                <i class="fa fa-file-excel-o text-3xl text-green-600 mb-2"></i>
+                                <span>Excel</span>
+                            </button>
+                            <button id="export-pdf" class="flex flex-col items-center p-4 border-2 border-gray-200 rounded-lg hover:border-primary transition-colors">
+                                <i class="fa fa-file-pdf-o text-3xl text-red-600 mb-2"></i>
+                                <span>PDF</span>
+                            </button>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '取消',
+                    showConfirmButton: true,
+                    customClass: {
+                        popup: 'w-96'
+                    },
+                    didOpen: () => {
+                        // Excel导出
+                        document.getElementById('export-excel').addEventListener('click', function() {
+                            Swal.close();
+                            showBatchExportProgress(checkedArchives.length, 'Excel');
+                        });
+                        
+                        // PDF导出
+                        document.getElementById('export-pdf').addEventListener('click', function() {
+                            Swal.close();
+                            showBatchExportProgress(checkedArchives.length, 'PDF');
+                        });
+                    }
+                });
+            });
+            
+            // 显示批量导出进度
+            function showBatchExportProgress(count, format) {
+                Swal.fire({
+                    title: `正在导出 ${count} 个文件 (${format})`,
+                    html: `
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>处理进度</span>
+                                <span id="batch-percentage">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="batch-progress" class="bg-secondary h-2.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <p id="batch-status" class="text-sm text-gray-500">准备导出...</p>
+                    `,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        const progressBar = document.getElementById('batch-progress');
+                        const percentageText = document.getElementById('batch-percentage');
+                        const statusText = document.getElementById('batch-status');
+                        
+                        let progress = 0;
+                        let currentFile = 1;
+                        
+                        const interval = setInterval(() => {
+                            if (progress < 100) {
+                                // 模拟每个文件的处理进度
+                                const fileProgress = Math.floor(100 / count);
+                                progress += Math.floor(Math.random() * 5) + 1;
+                                
+                                if (progress > currentFile * fileProgress) {
+                                    statusText.textContent = `正在处理第 ${currentFile} 个文件...`;
+                                    currentFile++;
+                                }
+                                
+                                if (progress > 100) progress = 100;
+                                
+                                progressBar.style.width = `${progress}%`;
+                                percentageText.textContent = `${progress}%`;
+                                
+                                if (progress === 100) {
+                                    clearInterval(interval);
+                                    statusText.textContent = "导出完成";
+                                    
+                                    // 导出完成后显示提示
+                                    setTimeout(() => {
+                                        Swal.close();
+                                        Swal.fire({
+                                            title: '批量导出完成',
+                                            text: `已成功导出 ${count} 个文件为${format}格式`,
+                                            icon: 'success',
+                                            confirmButtonText: '确定'
+                                        });
+                                    }, 1000);
+                                }
+                            }
+                        }, 500);
+                    }
+                });
+            }
+            
+            // 备份日志按钮点击事件
+            document.getElementById('backup-log-btn').addEventListener('click', function() {
+                Swal.fire({
+                    title: '备份日志',
+                    html: `
+                        <div class="overflow-y-auto max-h-96">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
+                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作人员</th>
+                                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">2024-05-10 02:00</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">自动备份2023-2024学年2学期数据</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">系统</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">成功</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">2024-04-25 14:30</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">手动备份会计学院数据</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">李老师</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">成功</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">2024-04-01 02:00</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">自动备份2023-2024学年2学期数据</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">系统</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">成功</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">2024-03-15 09:45</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">手动备份计算机学院数据</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">王主任</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">失败</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">2024-03-01 02:00</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">自动备份2023-2024学年2学期数据</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">系统</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">成功</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    `,
+                    width: 800,
+                    confirmButtonText: '关闭'
+                });
+            });
+            
+            // 查询按钮点击事件
+            document.getElementById('apply-filter').addEventListener('click', function() {
+                // 显示加载状态
+                Swal.fire({
+                    title: '查询中',
+                    text: '正在根据筛选条件查询数据...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // 模拟查询延迟
+                setTimeout(() => {
+                    Swal.close();
+                }, 1500);
+            });
+            
+            // 重置按钮点击事件
+            document.getElementById('reset-filter').addEventListener('click', function() {
+                document.getElementById('filter-form').reset();
+            });
+            
+            // 自定义列按钮点击事件
+            document.getElementById('customize-columns').addEventListener('click', function() {
+                Swal.fire({
+                    title: '自定义表格列',
+                    html: `
+                        <div class="space-y-3 mt-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="col-name" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="col-name" class="ml-2 text-sm text-gray-700">存档名称</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="col-year" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="col-year" class="ml-2 text-sm text-gray-700">学年/学期</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="col-count" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="col-count" class="ml-2 text-sm text-gray-700">数据量</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="col-time" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="col-time" class="ml-2 text-sm text-gray-700">存档时间</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="col-location" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="col-location" class="ml-2 text-sm text-gray-700">存储位置</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="col-status" checked class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="col-status" class="ml-2 text-sm text-gray-700">状态</label>
+                            </div>
+                        </div>
+                    `,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    showCancelButton: true
+                });
+            });
+        });
+    </script>
+</body>
+</html>
