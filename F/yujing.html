@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学生考勤管理系统 - 异常数据筛选</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  
+  <!-- 配置Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            warning: '#FF7D00',
+            danger: '#F53F3F',
+            success: '#00B42A',
+            gray: {
+              100: '#F2F3F5',
+              200: '#E5E6EB',
+              300: '#C9CDD4',
+              400: '#86909C',
+              500: '#4E5969',
+              600: '#272E3B',
+              700: '#1D2129',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .transition-all-300 {
+        transition: all 300ms ease-in-out;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-700 min-h-screen flex flex-col">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <!-- 左侧Logo和标题 -->
+        <div class="flex items-center space-x-3">
+          <div class="text-primary text-2xl">
+            <i class="fa fa-graduation-cap"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-semibold text-gray-700">学生考勤管理系统</h1>
+            <p class="text-xs text-gray-400">高效·精准·便捷</p>
+          </div>
+        </div>
+        
+        <!-- 右侧用户信息和操作 -->
+        <div class="flex items-center space-x-6">
+          <button class="text-gray-500 hover:text-primary transition-all-300 relative">
+            <i class="fa fa-bell-o"></i>
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-danger rounded-full text-white text-xs flex items-center justify-center">3</span>
+          </button>
+          <button class="text-gray-500 hover:text-primary transition-all-300">
+            <i class="fa fa-cog"></i>
+          </button>
+          <div class="flex items-center space-x-2">
+            <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+            <div>
+              <p class="text-sm font-medium">张主任</p>
+              <p class="text-xs text-gray-400">学生处</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体内容 -->
+  <main class="flex-1 container mx-auto px-4 py-6">
+    <!-- 面包屑导航 -->
+    <div class="text-sm mb-6">
+      <a href="#" class="text-gray-500 hover:text-primary">首页</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <a href="#" class="text-gray-500 hover:text-primary">考勤管理</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <a href="#" class="text-gray-500 hover:text-primary">数据统计</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <span class="text-primary">异常数据筛选</span>
+    </div>
+    
+    <!-- 页面标题 -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div>
+        <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-700">异常数据筛选</h2>
+        <p class="text-gray-400 mt-1">按条件筛选考勤异常学生，生成重点跟进清单</p>
+      </div>
+      <div class="mt-4 md:mt-0 flex space-x-3">
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 flex items-center">
+          <i class="fa fa-save mr-2"></i>保存筛选条件
+        </button>
+        <button class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-all-300 flex items-center">
+          <i class="fa fa-download mr-2"></i>导出清单
+        </button>
+      </div>
+    </div>
+    
+    <!-- 筛选条件面板 -->
+    <div class="bg-white rounded-lg p-6 card-shadow mb-6">
+      <h3 class="font-semibold text-lg mb-4 flex items-center">
+        <i class="fa fa-filter text-primary mr-2"></i>筛选条件
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">选择年级</label>
+          <div class="relative">
+            <select class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none">
+              <option value="all">所有年级</option>
+              <option value="23" selected>23级</option>
+              <option value="22">22级</option>
+              <option value="21">21级</option>
+            </select>
+            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">选择班级</label>
+          <div class="relative">
+            <select class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none">
+              <option value="all" selected>所有班级</option>
+              <option value="english1">英语1班</option>
+              <option value="english2">英语2班</option>
+              <option value="math1">数学1班</option>
+              <option value="math2">数学2班</option>
+            </select>
+            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">时间范围</label>
+          <div class="relative">
+            <select class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none">
+              <option value="7" selected>近7天</option>
+              <option value="15">近15天</option>
+              <option value="30">近30天</option>
+              <option value="term">本学期</option>
+              <option value="custom">自定义</option>
+            </select>
+            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">异常类型</label>
+          <div class="space-y-2">
+            <div class="flex items-center">
+              <input type="checkbox" id="absent" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" checked>
+              <label for="absent" class="ml-2 block text-sm text-gray-700">旷课</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="late" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" checked>
+              <label for="late" class="ml-2 block text-sm text-gray-700">迟到</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="earlyLeave" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+              <label for="earlyLeave" class="ml-2 block text-sm text-gray-700">早退</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="noReason" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+              <label for="noReason" class="ml-2 block text-sm text-gray-700">无正当理由请假</label>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">异常次数条件</label>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">旷课次数</label>
+              <div class="flex items-center">
+                <span class="text-sm text-gray-500 mr-2">≥</span>
+                <input type="number" value="2" min="1" class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                <span class="text-sm text-gray-500 ml-2">次</span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">迟到次数</label>
+              <div class="flex items-center">
+                <span class="text-sm text-gray-500 mr-2">≥</span>
+                <input type="number" value="3" min="1" class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                <span class="text-sm text-gray-500 ml-2">次</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">其他条件</label>
+          <div class="space-y-2">
+            <div class="flex items-center">
+              <input type="checkbox" id="consecutive" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" checked>
+              <label for="consecutive" class="ml-2 block text-sm text-gray-700">连续异常</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="keyCourse" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" checked>
+              <label for="keyCourse" class="ml-2 block text-sm text-gray-700">涉及核心课程</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="unhandled" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+              <label for="unhandled" class="ml-2 block text-sm text-gray-700">未处理的异常</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-6 flex justify-center">
+        <button class="px-6 py-3 bg-primary text-white rounded-md hover:bg-primary/90 transition-all-300 flex items-center">
+          <i class="fa fa-search mr-2"></i>执行筛选
+        </button>
+        <button class="ml-4 px-6 py-3 border border-gray-200 text-gray-600 rounded-md hover:bg-gray-50 transition-all-300">
+          重置条件
+        </button>
+      </div>
+    </div>
+    
+    <!-- 筛选结果统计 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-lg p-5 card-shadow border-l-4 border-danger">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-400 text-sm">异常学生总数</p>
+            <h3 class="text-2xl font-bold mt-1">12</h3>
+            <p class="text-danger text-sm mt-2 flex items-center">
+              <i class="fa fa-arrow-up mr-1"></i>较上周增加3人
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+            <i class="fa fa-user"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-5 card-shadow border-l-4 border-warning">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-400 text-sm">严重旷课学生</p>
+            <h3 class="text-2xl font-bold mt-1">5</h3>
+            <p class="text-warning text-sm mt-2 flex items-center">
+              <i class="fa fa-exclamation-circle mr-1"></i>需重点跟进
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+            <i class="fa fa-flag"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-5 card-shadow border-l-4 border-primary">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-400 text-sm">已处理异常</p>
+            <h3 class="text-2xl font-bold mt-1">4</h3>
+            <p class="text-primary text-sm mt-2 flex items-center">
+              <i class="fa fa-check-circle mr-1"></i>处理率33.3%
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            <i class="fa fa-check"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-5 card-shadow border-l-4 border-gray-500">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-400 text-sm">未处理异常</p>
+            <h3 class="text-2xl font-bold mt-1">8</h3>
+            <p class="text-gray-500 text-sm mt-2 flex items-center">
+              <i class="fa fa-clock-o mr-1"></i>平均处理时长1.2天
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+            <i class="fa fa-hourglass-half"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 异常类型分布 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div class="bg-white rounded-lg p-6 card-shadow lg:col-span-1">
+        <h3 class="font-semibold text-lg mb-4">异常类型分布</h3>
+        <div class="h-64">
+          <canvas id="abnormalTypeChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-6 card-shadow lg:col-span-2">
+        <h3 class="font-semibold text-lg mb-4">各班级异常人数</h3>
+        <div class="h-64">
+          <canvas id="classAbnormalChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 异常学生列表 -->
+    <div class="bg-white rounded-lg card-shadow mb-6">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+          <h3 class="font-semibold text-lg">异常学生清单</h3>
+          <div class="mt-4 md:mt-0 flex items-center">
+            <div class="relative mr-4">
+              <input type="text" placeholder="搜索学生..." class="pl-9 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm w-64">
+              <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <div class="relative">
+              <select class="pl-3 pr-8 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm appearance-none">
+                <option value="severity">按严重程度排序</option>
+                <option value="count-desc">异常次数从高到低</option>
+                <option value="count-asc">异常次数从低到高</option>
+                <option value="recent">最近异常</option>
+              </select>
+              <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">学生信息</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">班级</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">异常情况</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最近异常</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">处理状态</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-10 w-10 rounded-full" src="https://picsum.photos/id/1012/40/40" alt="学生照片">
+                  <div class="ml-3">
+                    <div class="font-medium">王小明</div>
+                    <div class="text-sm text-gray-500">2023010456</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div>23级英语2班</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="space-y-1">
+                  <div class="flex items-center text-sm">
+                    <span class="w-2 h-2 rounded-full bg-danger mr-2"></span>
+                    旷课: 4次
+                  </div>
+                  <div class="flex items-center text-sm">
+                    <span class="w-2 h-2 rounded-full bg-warning mr-2"></span>
+                    迟到: 3次
+                  </div>
+                  <div class="flex items-center text-sm text-danger">
+                    <i class="fa fa-exclamation-circle mr-1"></i>
+                    连续异常3天
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm">2023-10-15</div>
+                <div class="text-xs text-gray-500">大学英语</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-warning/10 text-warning">待跟进</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline mr-3">详情</a>
+                <a href="#" class="text-gray-500 hover:text-primary mr-3">联系</a>
+                <a href="#" class="text-success hover:text-success/80">标记已处理</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-10 w-10 rounded-full" src="https://picsum.photos/id/1027/40/40" alt="学生照片">
+                  <div class="ml-3">
+                    <div class="font-medium">李晓华</div>
+                    <div class="text-sm text-gray-500">2023020123</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div>23级数学1班</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="space-y-1">
+                  <div class="flex items-center text-sm">
+                    <span class="w-2 h-2 rounded-full bg-danger mr-2"></span>
+                    旷课: 2次
+                  </div>
+                  <div class="flex items-center text-sm">
+                    <span class="w-2 h-2 rounded-full bg-warning mr-2"></span>
+                    迟到: 5次
+                  </div>
+                  <div class="flex items-center text-sm text-danger">
+                    <i class="fa fa-exclamation-circle mr-1"></i>
+                    核心课程异常
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm">2023-10-14</div>
+                <div class="text-xs text-gray-500">高等数学</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">已跟进</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline mr-3">详情</a>
+                <a href="#" class="text-gray-500 hover:text-primary mr-3">联系</a>
+                <a href="#" class="text-gray-500 hover:text-gray-700">查看记录</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-10 w-10 rounded-full" src="https://picsum.photos/id/1025/40/40" alt="学生照片">
+                  <div class="ml-3">
+                    <div class="font-medium">张伟</div>
+                    <div class="text-sm text-gray-500">2023010789</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div>23级英语2班</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="space-y-1">
+                  <div class="flex items-center text-sm">
+                    <span class="w-2 h-2 rounded-full bg-danger mr-2"></span>
+                    旷课: 3次
+                  </div>
+                  <div class="flex items-center text-sm">
+                    <span class="w-2 h-2 rounded-full bg-warning mr-2"></span>
+                    迟到: 2次
+                  </div>
+                  <div class="flex items-center text-sm text-danger">
+                    <i class="fa fa-exclamation-circle mr-1"></i>
+                    连续异常2天
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm">2023-10-13</div>
+                <div class="text-xs text-gray-500">计算机基础</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-warning/10 text-warning">待跟进</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline mr-3">详情</a>
+                <a href="#" class="text-gray-500 hover:text-primary mr-3">联系</a>
+                <a href="#" class="text-success hover:text-success/80">标记已处理</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-10 w-10 rounded-full" src="https://picsum.photos/id/1062/40/40" alt="学生照片">
+                  <div class="ml-3">
+                    <div class="font-medium">刘芳</div>
+                    <div class="text-sm text-gray-500">2023030456</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div>23级物理班</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="space-y-1">
+                  <div class="flex items-center text-sm">
+                    <span class="w-2 h-2 rounded-full bg-danger mr-2"></span>
+                    旷课: 2次
+                  </div>
+                  <div class="flex items-center text-sm">
+                    <span class="w-2 h-2 rounded-full bg-gray-400 mr-2"></span>
+                    无理由请假: 2次
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm">2023-10-12</div>
+                <div class="text-xs text-gray-500">大学物理</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-warning/10 text-warning">待跟进</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline mr-3">详情</a>
+                <a href="#" class="text-gray-500 hover:text-primary mr-3">联系</a>
+                <a href="#" class="text-success hover:text-success/80">标记已处理</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-10 w-10 rounded-full" src="https://picsum.photos/id/1074/40/40" alt="学生照片">
+                  <div class="ml-3">
+                    <div class="font-medium">陈明</div>
+                    <div class="text-sm text-gray-500">2023020781</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div>23级数学1班</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="space-y-1">
+                  <div class="flex items-center text-sm">
+                    <span class="w-2 h-2 rounded-full bg-warning mr-2"></span>
+                    迟到: 6次
+                  </div>
+                  <div class="flex items-center text-sm">
+                    <span class="w-2 h-2 rounded-full bg-gray-400 mr-2"></span>
+                    早退: 2次
+                  </div>
+                  <div class="flex items-center text-sm text-danger">
+                    <i class="fa fa-exclamation-circle mr-1"></i>
+                    核心课程异常
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm">2023-10-11</div>
+                <div class="text-xs text-gray-500">高等数学</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">未处理</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline mr-3">详情</a>
+                <a href="#" class="text-gray-500 hover:text-primary mr-3">联系</a>
+                <a href="#" class="text-success hover:text-success/80">标记已处理</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 分页 -->
+      <div class="flex items-center justify-between p-6 border-t border-gray-200">
+        <div class="text-sm text-gray-500">
+          显示 1 至 5 条，共 12 条记录
+        </div>
+        <div class="flex space-x-1">
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 cursor-not-allowed">
+            <i class="fa fa-angle-left"></i>
+          </button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-primary bg-primary text-white">1</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-all-300">2</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-all-300">3</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:text-primary transition-all-300">
+            <i class="fa fa-angle-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 批量操作面板 -->
+    <div class="bg-white rounded-lg p-6 card-shadow">
+      <h3 class="font-semibold text-lg mb-4">批量操作</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary transition-all-300 cursor-pointer">
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+              <i class="fa fa-envelope"></i>
+            </div>
+            <div>
+              <h4 class="font-medium">发送提醒短信</h4>
+              <p class="text-sm text-gray-500 mt-1">向选中学生发送考勤异常提醒</p>
+            </div>
+          </div>
+        </div>
+        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary transition-all-300 cursor-pointer">
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+              <i class="fa fa-file-text-o"></i>
+            </div>
+            <div>
+              <h4 class="font-medium">生成跟进报告</h4>
+              <p class="text-sm text-gray-500 mt-1">为班主任生成异常学生跟进报告</p>
+            </div>
+          </div>
+        </div>
+        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary transition-all-300 cursor-pointer">
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+              <i class="fa fa-users"></i>
+            </div>
+            <div>
+              <h4 class="font-medium">安排约谈</h4>
+              <p class="text-sm text-gray-500 mt-1">为异常学生安排班主任约谈</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-white border-t border-gray-200 py-6 mt-6">
+    <div class="container mx-auto px-4">
+      <div class="text-center text-sm text-gray-500">
+        <p>© 2023 学生考勤管理系统 版权所有</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 初始化图表
+    document.addEventListener('DOMContentLoaded', function() {
+      // 异常类型分布图表
+      const typeCtx = document.getElementById('abnormalTypeChart').getContext('2d');
+      const typeChart = new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['旷课', '迟到', '早退', '无理由请假'],
+          datasets: [{
+            data: [18, 24, 5, 7],
+            backgroundColor: [
+              'rgba(245, 63, 63, 0.7)',
+              'rgba(255, 125, 0, 0.7)',
+              'rgba(153, 102, 255, 0.7)',
+              'rgba(86, 90, 100, 0.7)'
+            ],
+            borderColor: [
+              'rgba(245, 63, 63, 1)',
+              'rgba(255, 125, 0, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(86, 90, 100, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            }
+          },
+          cutout: '60%'
+        }
+      });
+      
+      // 各班级异常人数图表
+      const classCtx = document.getElementById('classAbnormalChart').getContext('2d');
+      const classChart = new Chart(classCtx, {
+        type: 'bar',
+        data: {
+          labels: ['英语1班', '英语2班', '数学1班', '数学2班', '物理班', '计算机班'],
+          datasets: [{
+            label: '异常学生人数',
+            data: [2, 4, 3, 1, 1, 1],
+            backgroundColor: 'rgba(22, 93, 255, 0.7)',
+            borderColor: 'rgba(22, 93, 255, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+    
