@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>班级与课程配置</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- 配置Tailwind自定义主题 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2563eb',
+            secondary: '#0d9488',
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .form-input-focus {
+        @apply focus:ring-2 focus:ring-primary/50 focus:border-primary focus:outline-none;
+      }
+      .schedule-cell {
+        @apply border border-gray-200 p-1 min-h-[70px];
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+  <!-- 顶部导航 -->
+  <header class="bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <i class="fa fa-graduation-cap text-primary text-2xl mr-2"></i>
+        <h1 class="text-xl font-semibold">班级与课程配置</h1>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <!-- 左侧：班级列表 -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="font-medium">班级列表</h2>
+            <button id="add-class-btn" class="text-sm bg-primary text-white px-3 py-1 rounded flex items-center">
+              <i class="fa fa-plus mr-1"></i> 新增
+            </button>
+          </div>
+          
+          <div class="p-2">
+            <input type="text" id="search-class" placeholder="搜索班级"
+                   class="w-full px-3 py-1.5 border border-gray-300 rounded text-sm form-input-focus mb-2">
+          </div>
+          
+          <div class="overflow-y-auto max-h-64">
+            <ul class="divide-y divide-gray-100">
+              <li>
+                <button class="w-full text-left px-4 py-2 bg-primary/10 text-primary hover:bg-primary/15 transition-colors class-item active" data-id="1">
+                  23级计算机1班
+                </button>
+              </li>
+              <li>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors class-item" data-id="2">
+                  23级计算机2班
+                </button>
+              </li>
+              <li>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors class-item" data-id="3">
+                  23级电子信息1班
+                </button>
+              </li>
+              <li>
+                <button class="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors class-item" data-id="4">
+                  23级电子商务1班
+                </button>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="p-4 border-t border-gray-200">
+            <div class="text-sm mb-3">
+              <p><span class="text-gray-500">当前班级：</span>23级计算机1班</p>
+              <p><span class="text-gray-500">班主任：</span>张三</p>
+              <p><span class="text-gray-500">所属院系：</span>计算机学院</p>
+            </div>
+            <div class="flex space-x-2">
+              <button id="edit-class-btn" class="flex-1 text-sm border border-primary text-primary px-2 py-1 rounded hover:bg-primary/5">
+                编辑
+              </button>
+              <button id="delete-class-btn" class="flex-1 text-sm border border-red-300 text-red-600 px-2 py-1 rounded hover:bg-red-50">
+                删除
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 右侧：课程表配置 -->
+      <div class="lg:col-span-3">
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="font-medium">课程表</h2>
+            <button id="add-course-btn" class="text-sm bg-secondary text-white px-3 py-1 rounded flex items-center">
+              <i class="fa fa-plus mr-1"></i> 添加课程
+            </button>
+          </div>
+          
+          <!-- 课程表 -->
+          <div class="p-2 overflow-x-auto">
+            <table class="min-w-full border-collapse">
+              <thead>
+                <tr>
+                  <th class="w-20 py-2 px-2 bg-gray-50 text-xs text-gray-500 border border-gray-200">时间/星期</th>
+                  <th class="py-2 px-2 bg-gray-50 text-center text-xs text-gray-500 border border-gray-200">周一</th>
+                  <th class="py-2 px-2 bg-gray-50 text-center text-xs text-gray-500 border border-gray-200">周二</th>
+                  <th class="py-2 px-2 bg-gray-50 text-center text-xs text-gray-500 border border-gray-200">周三</th>
+                  <th class="py-2 px-2 bg-gray-50 text-center text-xs text-gray-500 border border-gray-200">周四</th>
+                  <th class="py-2 px-2 bg-gray-50 text-center text-xs text-gray-500 border border-gray-200">周五</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- 第一节课 -->
+                <tr>
+                  <td class="py-2 px-2 bg-gray-50 text-xs text-gray-500 border border-gray-200">
+                    08:00-09:40
+                  </td>
+                  <td class="schedule-cell" data-weekday="1" data-period="1">
+                    <div class="bg-blue-100 rounded p-1 text-xs course-item" data-id="101">
+                      <div class="font-medium">数据结构</div>
+                      <div>张三 · 计算机楼301</div>
+                    </div>
+                  </td>
+                  <td class="schedule-cell" data-weekday="2" data-period="1">
+                    <div class="bg-green-100 rounded p-1 text-xs course-item" data-id="102">
+                      <div class="font-medium">高等数学</div>
+                      <div>李四 · 教学楼205</div>
+                    </div>
+                  </td>
+                  <td class="schedule-cell" data-weekday="3" data-period="1"></td>
+                  <td class="schedule-cell" data-weekday="4" data-period="1">
+                    <div class="bg-purple-100 rounded p-1 text-xs course-item" data-id="103">
+                      <div class="font-medium">计算机网络</div>
+                      <div>王五 · 计算机楼203</div>
+                    </div>
+                  </td>
+                  <td class="schedule-cell" data-weekday="5" data-period="1">
+                    <div class="bg-blue-100 rounded p-1 text-xs course-item" data-id="104">
+                      <div class="font-medium">数据结构</div>
+                      <div>张三 · 计算机楼301</div>
+                    </div>
+                  </td>
+                </tr>
+                
+                <!-- 第二节课 -->
+                <tr>
+                  <td class="py-2 px-2 bg-gray-50 text-xs text-gray-500 border border-gray-200">
+                    10:00-11:40
+                  </td>
+                  <td class="schedule-cell" data-weekday="1" data-period="2">
+                    <div class="bg-yellow-100 rounded p-1 text-xs course-item" data-id="105">
+                      <div class="font-medium">大学英语</div>
+                      <div>赵六 · 外语楼102</div>
+                    </div>
+                  </td>
+                  <td class="schedule-cell" data-weekday="2" data-period="2"></td>
+                  <td class="schedule-cell" data-weekday="3" data-period="2">
+                    <div class="bg-green-100 rounded p-1 text-xs course-item" data-id="106">
+                      <div class="font-medium">高等数学</div>
+                      <div>李四 · 教学楼205</div>
+                    </div>
+                  </td>
+                  <td class="schedule-cell" data-weekday="4" data-period="2"></td>
+                  <td class="schedule-cell" data-weekday="5" data-period="2">
+                    <div class="bg-red-100 rounded p-1 text-xs course-item" data-id="107">
+                      <div class="font-medium">操作系统</div>
+                      <div>钱七 · 计算机楼402</div>
+                    </div>
+                  </td>
+                </tr>
+                
+                <!-- 下午课程 -->
+                <tr>
+                  <td class="py-2 px-2 bg-gray-50 text-xs text-gray-500 border border-gray-200">
+                    14:00-15:40
+                  </td>
+                  <td class="schedule-cell" data-weekday="1" data-period="3"></td>
+                  <td class="schedule-cell" data-weekday="2" data-period="3">
+                    <div class="bg-purple-100 rounded p-1 text-xs course-item" data-id="108">
+                      <div class="font-medium">计算机网络</div>
+                      <div>王五 · 计算机楼203</div>
+                    </div>
+                  </td>
+                  <td class="schedule-cell" data-weekday="3" data-period="3"></td>
+                  <td class="schedule-cell" data-weekday="4" data-period="3">
+                    <div class="bg-red-100 rounded p-1 text-xs course-item" data-id="109">
+                      <div class="font-medium">操作系统</div>
+                      <div>钱七 · 计算机楼402</div>
+                    </div>
+                  </td>
+                  <td class="schedule-cell" data-weekday="5" data-period="3"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- 新增/编辑班级模态框 -->
+  <div id="class-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow max-w-md w-full mx-4">
+      <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+        <h3 class="font-medium" id="class-modal-title">新增班级</h3>
+        <button id="close-class-modal" class="text-gray-400 hover:text-gray-500">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="p-4">
+        <form id="class-form">
+          <input type="hidden" id="class-id">
+          
+          <div class="mb-3">
+            <label for="class-name" class="block text-sm text-gray-700 mb-1">班级名称 <span class="text-red-500">*</span></label>
+            <input type="text" id="class-name" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm form-input-focus"
+                   placeholder="例如：23级计算机1班">
+          </div>
+          
+          <div class="mb-3">
+            <label for="class-teacher" class="block text-sm text-gray-700 mb-1">班主任 <span class="text-red-500">*</span></label>
+            <select id="class-teacher" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded text-sm form-input-focus">
+              <option value="">请选择班主任</option>
+              <option value="1">张三 (计算机学院)</option>
+              <option value="2">李四 (数学与统计学院)</option>
+              <option value="3">王五 (计算机学院)</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="class-department" class="block text-sm text-gray-700 mb-1">所属院系 <span class="text-red-500">*</span></label>
+            <select id="class-department" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded text-sm form-input-focus">
+              <option value="">请选择院系</option>
+              <option value="计算机学院">计算机学院</option>
+              <option value="电子信息学院">电子信息学院</option>
+              <option value="商学院">商学院</option>
+            </select>
+          </div>
+          
+          <div class="mt-4 flex justify-end space-x-2">
+            <button type="button" id="cancel-class" class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50">
+              取消
+            </button>
+            <button type="submit" class="px-3 py-1 bg-primary text-white rounded text-sm hover:bg-primary/90">
+              保存
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 新增/编辑课程模态框 -->
+  <div id="course-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow max-w-md w-full mx-4">
+      <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+        <h3 class="font-medium" id="course-modal-title">添加课程</h3>
+        <button id="close-course-modal" class="text-gray-400 hover:text-gray-500">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="p-4">
+        <form id="course-form">
+          <input type="hidden" id="course-id">
+          <input type="hidden" id="course-weekday">
+          <input type="hidden" id="course-period">
+          
+          <div class="mb-3">
+            <label for="course-name" class="block text-sm text-gray-700 mb-1">课程名称 <span class="text-red-500">*</span></label>
+            <input type="text" id="course-name" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm form-input-focus"
+                   placeholder="请输入课程名称">
+          </div>
+          
+          <div class="mb-3">
+            <label for="course-teacher" class="block text-sm text-gray-700 mb-1">授课教师 <span class="text-red-500">*</span></label>
+            <select id="course-teacher" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded text-sm form-input-focus">
+              <option value="">请选择教师</option>
+              <option value="1">张三 (计算机学院)</option>
+              <option value="2">李四 (数学与统计学院)</option>
+              <option value="3">王五 (计算机学院)</option>
+            </select>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label for="course-weekday-select" class="block text-sm text-gray-700 mb-1">星期 <span class="text-red-500">*</span></label>
+              <select id="course-weekday-select" required
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm form-input-focus">
+                <option value="">请选择</option>
+                <option value="1">周一</option>
+                <option value="2">周二</option>
+                <option value="3">周三</option>
+                <option value="4">周四</option>
+                <option value="5">周五</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="course-period-select" class="block text-sm text-gray-700 mb-1">节次 <span class="text-red-500">*</span></label>
+              <select id="course-period-select" required
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm form-input-focus">
+                <option value="">请选择</option>
+                <option value="1">第1节 (08:00-09:40)</option>
+                <option value="2">第2节 (10:00-11:40)</option>
+                <option value="3">第3节 (14:00-15:40)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="course-location" class="block text-sm text-gray-700 mb-1">上课地点 <span class="text-red-500">*</span></label>
+            <input type="text" id="course-location" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm form-input-focus"
+                   placeholder="例如：计算机楼301">
+          </div>
+          
+          <div class="mt-4 flex justify-end space-x-2">
+            <button type="button" id="cancel-course" class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50">
+              取消
+            </button>
+            <button type="button" id="delete-course-btn" class="px-3 py-1 border border-red-300 text-red-600 rounded text-sm hover:bg-red-50 hidden">
+              删除
+            </button>
+            <button type="submit" class="px-3 py-1 bg-secondary text-white rounded text-sm hover:bg-secondary/90">
+              保存
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 删除确认模态框 -->
+  <div id="delete-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow max-w-md w-full mx-4">
+      <div class="p-4">
+        <div class="flex items-center mb-3">
+          <i class="fa fa-exclamation-triangle text-yellow-500 text-xl mr-2"></i>
+          <h3 class="font-medium">确认删除</h3>
+        </div>
+        <div class="mb-4">
+          <p class="text-sm text-gray-600" id="delete-confirmation-text">
+            您确定要删除吗？
+          </p>
+        </div>
+        <div class="flex justify-end space-x-2">
+          <button id="cancel-delete" class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50">
+            取消
+          </button>
+          <button id="confirm-delete" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+            确认删除
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 成功提示 -->
+  <div id="success-toast" class="fixed bottom-5 right-5 bg-green-600 text-white px-3 py-2 rounded shadow transform translate-y-20 opacity-0 transition-all duration-300 flex items-center z-50">
+    <i class="fa fa-check-circle mr-2"></i>
+    <span id="success-message">操作成功</span>
+  </div>
+
+  <script>
+    // 存储数据
+    let classes = [
+      { id: 1, name: '23级计算机1班', teacher: '张三', department: '计算机学院' },
+      { id: 2, name: '23级计算机2班', teacher: '王五', department: '计算机学院' },
+      { id: 3, name: '23级电子信息1班', teacher: '吴十', department: '电子信息学院' },
+      { id: 4, name: '23级电子商务1班', teacher: '郑十一', department: '商学院' }
+    ];
+    
+    let courses = [
+      { id: 101, classId: 1, name: '数据结构', teacher: '张三', weekday: 1, period: 1, location: '计算机楼301' },
+      { id: 102, classId: 1, name: '高等数学', teacher: '李四', weekday: 2, period: 1, location: '教学楼205' },
+      { id: 103, classId: 1, name: '计算机网络', teacher: '王五', weekday: 4, period: 1, location: '计算机楼203' },
+      { id: 104, classId: 1, name: '数据结构', teacher: '张三', weekday: 5, period: 1, location: '计算机楼301' },
+      { id: 105, classId: 1, name: '大学英语', teacher: '赵六', weekday: 1, period: 2, location: '外语楼102' },
+      { id: 106, classId: 1, name: '高等数学', teacher: '李四', weekday: 3, period: 2, location: '教学楼205' },
+      { id: 107, classId: 1, name: '操作系统', teacher: '钱七', weekday: 5, period: 2, location: '计算机楼402' },
+      { id: 108, classId: 1, name: '计算机网络', teacher: '王五', weekday: 2, period: 3, location: '计算机楼203' },
+      { id: 109, classId: 1, name: '操作系统', teacher: '钱七', weekday: 4, period: 3, location: '计算机楼402' }
+    ];
+    
+    let currentClassId = 1;
+    let deleteType = '';
+    let deleteId = null;
+    
+    // DOM元素
+    const classItems = document.querySelectorAll('.class-item');
+    const addClassBtn = document.getElementById('add-class-btn');
+    const editClassBtn = document.getElementById('edit-class-btn');
+    const deleteClassBtn = document.getElementById('delete-class-btn');
+    const classModal = document.getElementById('class-modal');
+    const classModalTitle = document.getElementById('class-modal-title');
+    const closeClassModal = document.getElementById('close-class-modal');
+    const cancelClassBtn = document.getElementById('cancel-class');
+    const classForm = document.getElementById('class-form');
+    const classIdInput = document.getElementById('class-id');
+    const classNameInput = document.getElementById('class-name');
+    const classTeacherSelect = document.getElementById('class-teacher');
+    const classDepartmentSelect = document.getElementById('class-department');
+    const addCourseBtn = document.getElementById('add-course-btn');
+    const courseModal = document.getElementById('course-modal');
+    const courseModalTitle = document.getElementById('course-modal-title');
+    const closeCourseModal = document.getElementById('close-course-modal');
+    const cancelCourseBtn = document.getElementById('cancel-course');
+    const courseForm = document.getElementById('course-form');
+    const courseIdInput = document.getElementById('course-id');
+    const courseNameInput = document.getElementById('course-name');
+    const courseTeacherSelect = document.getElementById('course-teacher');
+    const courseWeekdaySelect = document.getElementById('course-weekday-select');
+    const coursePeriodSelect = document.getElementById('course-period-select');
+    const courseLocationInput = document.getElementById('course-location');
+    const courseWeekdayInput = document.getElementById('course-weekday');
+    const coursePeriodInput = document.getElementById('course-period');
+    const deleteCourseBtn = document.getElementById('delete-course-btn');
+    const deleteModal = document.getElementById('delete-modal');
+    const deleteConfirmationText = document.getElementById('delete-confirmation-text');
+    const cancelDeleteBtn = document.getElementById('cancel-delete');
+    const confirmDeleteBtn = document.getElementById('confirm-delete');
+    const successToast = document.getElementById('success-toast');
+    const successMessage = document.getElementById('success-message');
+    const scheduleCells = document.querySelectorAll('.schedule-cell');
+    const searchClassInput = document.getElementById('search-class');
+    
+    // 初始化事件监听
+    document.addEventListener('DOMContentLoaded', function() {
+      setupEventListeners();
+    });
+    
+    // 设置事件监听
+    function setupEventListeners() {
+      // 班级选择
+      document.querySelectorAll('.class-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const classId = parseInt(this.getAttribute('data-id'));
+          
+          // 更新选中状态
+          document.querySelectorAll('.class-item').forEach(i => {
+            i.classList.remove('active', 'bg-primary/10', 'text-primary');
+          });
+          this.classList.add('active', 'bg-primary/10', 'text-primary');
+          
+          currentClassId = classId;
+          loadClassCourses(classId);
+        });
+      });
+      
+      // 搜索班级
+      searchClassInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim().toLowerCase();
+        document.querySelectorAll('.class-item').forEach(item => {
+          const className = item.textContent.toLowerCase();
+          item.parentElement.style.display = className.includes(searchTerm) ? '' : 'none';
+        });
+      });
+      
+      // 新增班级
+      addClassBtn.addEventListener('click', function() {
+        classModalTitle.textContent = '新增班级';
+        classForm.reset();
+        classIdInput.value = '';
+        classModal.classList.remove('hidden');
+      });
+      
+      // 编辑班级
+      editClassBtn.addEventListener('click', function() {
+        const classData = classes.find(c => c.id === currentClassId);
+        if (!classData) return;
+        
+        classModalTitle.textContent = '编辑班级';
+        classIdInput.value = classData.id;
+        classNameInput.value = classData.name;
+        classTeacherSelect.value = classData.teacherId || '';
+        classDepartmentSelect.value = classData.department;
+        
+        classModal.classList.remove('hidden');
+      });
+      
+      // 关闭班级模态框
+      closeClassModal.addEventListener('click', () => classModal.classList.add('hidden'));
+      cancelClassBtn.addEventListener('click', () => classModal.classList.add('hidden'));
+      
+      // 提交班级表单
+      classForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const classData = {
+          name: classNameInput.value.trim(),
+          teacher: classTeacherSelect.options[classTeacherSelect.selectedIndex].text.split(' ')[0],
+          teacherId: classTeacherSelect.value,
+          department: classDepartmentSelect.value
+        };
+        
+        if (!classData.name || !classData.teacherId || !classData.department) {
+          alert('请填写必填字段');
+          return;
+        }
+        
+        if (classIdInput.value) {
+          // 更新班级
+          const id = parseInt(classIdInput.value);
+          const index = classes.findIndex(c => c.id === id);
+          if (index !== -1) {
+            classes[index] = { ...classes[index], ...classData };
+            showSuccessToast('班级已更新');
+          }
+        } else {
+          // 新增班级
+          const newId = Math.max(...classes.map(c => c.id)) + 1;
+          classes.push({ id: newId, ...classData });
+          showSuccessToast('班级已创建');
+        }
+        
+        updateClassList();
+        classModal.classList.add('hidden');
+      });
+      
+      // 删除班级
+      deleteClassBtn.addEventListener('click', function() {
+        deleteType = 'class';
+        deleteId = currentClassId;
+        deleteConfirmationText.textContent = '您确定要删除这个班级吗？相关课程也将被删除。';
+        deleteModal.classList.remove('hidden');
+      });
+      
+      // 取消删除
+      cancelDeleteBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
+      
+      // 确认删除
+      confirmDeleteBtn.addEventListener('click', function() {
+        if (deleteType === 'class' && deleteId) {
+          // 删除班级及课程
+          classes = classes.filter(c => c.id !== deleteId);
+          courses = courses.filter(c => c.classId !== deleteId);
+          
+          // 切换到第一个班级
+          if (classes.length > 0) {
+            currentClassId = classes[0].id;
+            loadClassCourses(currentClassId);
+          }
+          
+          updateClassList();
+          showSuccessToast('班级已删除');
+        } else if (deleteType === 'course' && deleteId) {
+          // 删除课程
+          courses = courses.filter(c => c.id !== deleteId);
+          loadClassCourses(currentClassId);
+          showSuccessToast('课程已删除');
+        }
+        
+        deleteModal.classList.add('hidden');
+      });
+      
+      // 新增课程
+      addCourseBtn.addEventListener('click', function() {
+        courseModalTitle.textContent = '添加课程';
+        courseForm.reset();
+        courseIdInput.value = '';
+        courseWeekdayInput.value = '';
+        coursePeriodInput.value = '';
+        deleteCourseBtn.classList.add('hidden');
+        courseModal.classList.remove('hidden');
+      });
+      
+      // 课程表单元格点击
+      scheduleCells.forEach(cell => {
+        cell.addEventListener('click', function(e) {
+          if (e.target.closest('.course-item')) return;
+          
+          const weekday = this.getAttribute('data-weekday');
+          const period = this.getAttribute('data-period');
+          
+          courseModalTitle.textContent = '添加课程';
+          courseForm.reset();
+          courseIdInput.value = '';
+          courseWeekdayInput.value = weekday;
+          coursePeriodInput.value = period;
+          courseWeekdaySelect.value = weekday;
+          coursePeriodSelect.value = period;
+          deleteCourseBtn.classList.add('hidden');
+          
+          courseModal.classList.remove('hidden');
+        });
+      });
+      
+      // 编辑课程
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('.course-item')) {
+          const courseItem = e.target.closest('.course-item');
+          const courseId = parseInt(courseItem.getAttribute('data-id'));
+          const course = courses.find(c => c.id === courseId);
+          
+          if (course) {
+            courseModalTitle.textContent = '编辑课程';
+            courseIdInput.value = course.id;
+            courseNameInput.value = course.name;
+            courseTeacherSelect.value = course.teacherId || '';
+            courseWeekdaySelect.value = course.weekday;
+            coursePeriodSelect.value = course.period;
+            courseLocationInput.value = course.location;
+            courseWeekdayInput.value = course.weekday;
+            coursePeriodInput.value = course.period;
+            
+            deleteCourseBtn.classList.remove('hidden');
+            courseModal.classList.remove('hidden');
+          }
+        }
+      });
+      
+      // 关闭课程模态框
+      closeCourseModal.addEventListener('click', () => courseModal.classList.add('hidden'));
+      cancelCourseBtn.addEventListener('click', () => courseModal.classList.add('hidden'));
+      
+      // 周和节次选择变化
+      courseWeekdaySelect.addEventListener('change', function() {
+        courseWeekdayInput.value = this.value;
+      });
+      
+      coursePeriodSelect.addEventListener('change', function() {
+        coursePeriodInput.value = this.value;
+      });
+      
+      // 删除课程
+      deleteCourseBtn.addEventListener('click', function() {
+        deleteType = 'course';
+        deleteId = parseInt(courseIdInput.value);
+        deleteConfirmationText.textContent = '您确定要删除这门课程吗？';
+        courseModal.classList.add('hidden');
+        deleteModal.classList.remove('hidden');
+      });
+      
+      // 提交课程表单
+      courseForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const courseData = {
+          classId: currentClassId,
+          name: courseNameInput.value.trim(),
+          teacher: courseTeacherSelect.options[courseTeacherSelect.selectedIndex].text.split(' ')[0],
+          teacherId: courseTeacherSelect.value,
+          weekday: parseInt(courseWeekdayInput.value),
+          period: parseInt(coursePeriodInput.value),
+          location: courseLocationInput.value.trim()
+        };
+        
+        if (!courseData.name || !courseData.teacherId || !courseData.weekday || !courseData.period || !courseData.location) {
+          alert('请填写必填字段');
+          return;
+        }
+        
+        // 检查时间冲突
+        const conflicting = courses.find(c => 
+          c.classId === currentClassId && 
+          c.weekday === courseData.weekday && 
+          c.period === courseData.period && 
+          c.id !== (parseInt(courseIdInput.value) || 0)
+        );
+        
+        if (conflicting) {
+          alert('该时间段已有课程，请勿重复添加');
+          return;
+        }
+        
+        if (courseIdInput.value) {
+          // 更新课程
+          const id = parseInt(courseIdInput.value);
+          const index = courses.findIndex(c => c.id === id);
+          if (index !== -1) {
+            courses[index] = { ...courses[index], ...courseData };
+            showSuccessToast('课程已更新');
+          }
+        } else {
+          // 新增课程
+          const newId = courses.length > 0 ? Math.max(...courses.map(c => c.id)) + 1 : 101;
+          courses.push({ id: newId, ...courseData });
+          showSuccessToast('课程已添加');
+        }
+        
+        loadClassCourses(currentClassId);
+        courseModal.classList.add('hidden');
+      });
+    }
+    
+    // 更新班级列表
+    function updateClassList() {
+      const classList = document.querySelector('.overflow-y-auto ul');
+      classList.innerHTML = '';
+      
+      classes.forEach(cls => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <button class="w-full text-left px-4 py-2 ${currentClassId === cls.id ? 'bg-primary/10 text-primary' : 'hover:bg-gray-50'} transition-colors class-item" data-id="${cls.id}">
+            ${cls.name}
+          </button>
+        `;
+        classList.appendChild(li);
+      });
+    }
+    
+    // 加载班级课程
+    function loadClassCourses(classId) {
+      // 清空课程表
+      document.querySelectorAll('.schedule-cell').forEach(cell => {
+        cell.innerHTML = '';
+      });
+      
+      // 加载课程
+      const classCourses = courses.filter(c => c.classId === classId);
+      
+      classCourses.forEach(course => {
+        const cell = document.querySelector(`.schedule-cell[data-weekday="${course.weekday}"][data-period="${course.period}"]`);
+        if (cell) {
+          // 简单的颜色分配
+          const colors = ['blue', 'green', 'purple', 'yellow', 'red', 'indigo', 'pink'];
+          const colorIndex = course.id % colors.length;
+          const color = colors[colorIndex];
+          
+          cell.innerHTML = `
+            <div class="bg-${color}-100 rounded p-1 text-xs course-item" data-id="${course.id}">
+              <div class="font-medium">${course.name}</div>
+              <div>${course.teacher} · ${course.location}</div>
+            </div>
+          `;
+        }
+      });
+    }
+    
+    // 显示成功提示
+    function showSuccessToast(message) {
+      successMessage.textContent = message;
+      successToast.classList.remove('translate-y-20', 'opacity-0');
+      
+      setTimeout(() => {
+        successToast.classList.add('translate-y-20', 'opacity-0');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

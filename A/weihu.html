@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生基础信息维护系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto p-4">
+        <!-- 页面标题 -->
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">学生基础信息维护</h1>
+
+        <!-- 操作区 -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap gap-3">
+            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="showAddForm()">单个新增</button>
+            <label class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer">
+                批量导入
+                <input type="file" accept=".xlsx,.xls" class="hidden" onchange="handleBatchImport(this)">
+            </label>
+            <input type="text" placeholder="搜索学生（姓名/学号）" class="border rounded px-3 py-2 flex-1 max-w-md" oninput="searchStudent(this.value)">
+        </div>
+
+        <!-- 单个新增表单（默认隐藏） -->
+        <div id="addForm" class="bg-white rounded-lg shadow p-4 mb-6 hidden">
+            <h2 class="text-xl font-semibold mb-4">新增学生信息</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                    <input type="text" id="stuName" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">学号</label>
+                    <input type="text" id="stuId" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">班级</label>
+                    <input type="text" id="stuClass" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">院系</label>
+                    <input type="text" id="stuDept" class="w-full border rounded px-3 py-2" required>
+                </div>
+            </div>
+            <div class="mt-4 flex gap-3">
+                <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onclick="addStudent()">提交</button>
+                <button class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400" onclick="hideAddForm()">取消</button>
+            </div>
+        </div>
+
+        <!-- 学生信息表格 -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">姓名</</th>
+                        <<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">学号</</th>
+                        <<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">班级</</th>
+                        <<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">院系</</th>
+                        <<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- 学生数据将通过JS动态渲染 -->
+                </tbody>
+            </table>
+            <!-- 空数据提示 -->
+            <div id="emptyTip" class="py-10 text-center text-gray-500">暂无学生数据</div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟学生数据存储
+        let studentData = [];
+        // 初始渲染表格
+        renderStudentTable();
+
+        // 显示新增表单
+        function showAddForm() {
+            document.getElementById('addForm').classList.remove('hidden');
+        }
+
+        // 隐藏新增表单
+        function hideAddForm() {
+            document.getElementById('addForm').classList.add('hidden');
+            // 清空表单
+            document.getElementById('stuName').value = '';
+            document.getElementById('stuId').value = '';
+            document.getElementById('stuClass').value = '';
+            document.getElementById('stuDept').value = '';
+        }
+
+        // 新增学生
+        function addStudent() {
+            const name = document.getElementById('stuName').value.trim();
+            const id = document.getElementById('stuId').value.trim();
+            const className = document.getElementById('stuClass').value.trim();
+            const dept = document.getElementById('stuDept').value.trim();
+
+            // 简单验证
+            if (!name || !id || !className || !dept) {
+                alert('请填写完整学生信息');
+                return;
+            }
+            // 验证学号唯一性
+            if (studentData.some(stu => stu.id === id)) {
+                alert('该学号已存在');
+                return;
+            }
+
+            // 添加到数据列表
+            studentData.push({ id, name, className, dept });
+            // 重新渲染表格
+            renderStudentTable();
+            // 隐藏表单并清空
+            hideAddForm();
+            alert('新增成功');
+        }
+
+        // 编辑学生
+        function editStudent(id) {
+            const student = studentData.find(stu => stu.id === id);
+            if (!student) return;
+
+            // 填充表单
+            document.getElementById('stuName').value = student.name;
+            document.getElementById('stuId').value = student.id;
+            document.getElementById('stuId').readOnly = true; // 学号不可修改
+            document.getElementById('stuClass').value = student.className;
+            document.getElementById('stuDept').value = student.dept;
+
+            // 显示表单，修改提交按钮逻辑
+            const addForm = document.getElementById('addForm');
+            addForm.classList.remove('hidden');
+            const submitBtn = addForm.querySelector('button:first-child');
+            submitBtn.textContent = '保存修改';
+            submitBtn.onclick = function() {
+                const newName = document.getElementById('stuName').value.trim();
+                const newClass = document.getElementById('stuClass').value.trim();
+                const newDept = document.getElementById('stuDept').value.trim();
+
+                if (!newName || !newClass || !newDept) {
+                    alert('请填写完整学生信息');
+                    return;
+                }
+
+                // 更新数据
+                student.name = newName;
+                student.className = newClass;
+                student.dept = newDept;
+                // 重新渲染表格
+                renderStudentTable();
+                // 隐藏表单并重置
+                hideAddForm();
+                document.getElementById('stuId').readOnly = false;
+                submitBtn.textContent = '提交';
+                submitBtn.onclick = addStudent;
+                alert('修改成功');
+            };
+        }
+
+        // 删除（注销）学生
+        function deleteStudent(id) {
+            if (confirm('确定要注销该学生信息吗？')) {
+                studentData = studentData.filter(stu => stu.id !== id);
+                renderStudentTable();
+                alert('注销成功');
+            }
+        }
+
+        // 批量导入（模拟，实际需结合后端处理Excel）
+        function handleBatchImport(fileInput) {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // 模拟导入成功（实际项目需用XLSX.js解析Excel）
+            alert(`已选择文件：${file.name}，批量导入功能需结合后端实现`);
+            // 重置文件输入
+            fileInput.value = '';
+        }
+
+        // 搜索学生
+        function searchStudent(keyword) {
+            if (!keyword.trim()) {
+                renderStudentTable();
+                return;
+            }
+
+            const filteredData = studentData.filter(stu => 
+                stu.name.includes(keyword) || stu.id.includes(keyword)
+            );
+            renderStudentTable(filteredData);
+        }
+
+        // 渲染学生表格
+        function renderStudentTable(data = studentData) {
+            const tableBody = document.getElementById('studentTableBody');
+            const emptyTip = document.getElementById('emptyTip');
+
+            // 清空表格
+            tableBody.innerHTML = '';
+
+            // 显示空提示或渲染数据
+            if (data.length === 0) {
+                emptyTip.classList.remove('hidden');
+                return;
+            }
+            emptyTip.classList.add('hidden');
+
+            // 渲染数据行
+            data.forEach(student => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${student.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${student.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${student.className}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${student.dept}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button class="text-blue-500 hover:text-blue-700 mr-4" onclick="editStudent('${student.id}')">编辑</button>
+                        <button class="text-red-500 hover:text-red-700" onclick="deleteStudent('${student.id}')">注销</button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
