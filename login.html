@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生考勤管理系统 - 登录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E40AF',
+                        secondary: '#3B82F6',
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .login-gradient {
+                background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+            }
+            .card-shadow {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            }
+            .input-focus {
+                @apply focus:ring-2 focus:ring-primary/50 focus:border-primary focus:outline-none;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- 左侧品牌区域 -->
+        <div class="hidden md:flex md:w-1/2 login-gradient p-12 text-white flex-col justify-center">
+            <div class="max-w-md">
+                <div class="flex items-center mb-8">
+                    <i class="fa fa-graduation-cap text-3xl mr-3"></i>
+                    <h1 class="text-2xl font-bold">学生考勤管理系统</h1>
+                </div>
+                
+                <h2 class="text-3xl font-bold mb-4">高效管理，智能考勤</h2>
+                <p class="text-blue-100 mb-8">基于角色的权限管理，为不同用户提供专属功能体验，提升考勤管理效率</p>
+                
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="bg-white/20 p-2 rounded-full mr-4">
+                            <i class="fa fa-shield text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold mb-1">精细权限控制</h3>
+                            <p class="text-blue-100 text-sm">根据用户角色分配不同操作权限，保障数据安全</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="bg-white/20 p-2 rounded-full mr-4">
+                            <i class="fa fa-users text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold mb-1">多角色支持</h3>
+                            <p class="text-blue-100 text-sm">支持管理员、教师、学生等多角色登录，功能按需分配</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="bg-white/20 p-2 rounded-full mr-4">
+                            <i class="fa fa-lock text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold mb-1">安全访问控制</h3>
+                            <p class="text-blue-100 text-sm">严格的访问控制机制，防止未授权操作和数据泄露</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧登录表单 -->
+        <div class="w-full md:w-1/2 flex items-center justify-center p-8">
+            <div class="w-full max-w-md">
+                <!-- 移动端logo -->
+                <div class="flex items-center justify-center mb-8 md:hidden">
+                    <i class="fa fa-graduation-cap text-3xl mr-3 text-primary"></i>
+                    <h1 class="text-2xl font-bold text-gray-800">学生考勤管理系统</h1>
+                </div>
+                
+                <div class="bg-white rounded-xl p-8 card-shadow">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">用户登录</h2>
+                    
+                    <form id="login-form" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">登录角色</label>
+                            <div class="relative">
+                                <select id="user-role" class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus appearance-none">
+                                    <option value="student">学生</option>
+                                    <option value="teacher">任课教师</option>
+                                    <option value="head-teacher">班主任</option>
+                                    <option value="dept-admin">院系管理员</option>
+                                    <option value="super-admin">超级管理员</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                                    <i class="fa fa-chevron-down text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">账号</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <i class="fa fa-user text-gray-400"></i>
+                                </div>
+                                <input type="text" id="username" class="w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg input-focus" placeholder="请输入账号">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <i class="fa fa-lock text-gray-400"></i>
+                                </div>
+                                <input type="password" id="password" class="w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg input-focus" placeholder="请输入密码">
+                                <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600">
+                                    <i class="fa fa-eye-slash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="remember-me" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="remember-me" class="ml-2 block text-sm text-gray-700">记住我</label>
+                            </div>
+                            <a href="#" class="text-sm text-primary hover:text-primary/80">忘记密码?</a>
+                        </div>
+                        
+                        <button type="submit" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
+                            登录系统
+                        </button>
+                    </form>
+                </div>
+                
+                <p class="text-center text-gray-500 text-sm mt-6">
+                    &copy; 2023 学生考勤管理系统 - 版权所有
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 角色权限配置
+        const rolePermissions = {
+            'super-admin': {
+                name: '超级管理员',
+                menus: [
+                    'dashboard', 'data-management', 'attendance-rules', 
+                    'attendance-records', 'leave-approval', 'data-statistics',
+                    'notifications', 'data-export', 'permission-management',
+                    'operation-logs', 'help-center'
+                ],
+                permissions: ['create', 'read', 'update', 'delete', 'import', 'export', 'approve', 'manage-roles']
+            },
+            'dept-admin': {
+                name: '院系管理员',
+                menus: [
+                    'dashboard', 'data-management', 'attendance-rules', 
+                    'attendance-records', 'leave-approval', 'data-statistics',
+                    'notifications', 'data-export', 'operation-logs', 'help-center'
+                ],
+                permissions: ['create', 'read', 'update', 'import', 'export', 'approve']
+            },
+            'head-teacher': {
+                name: '班主任',
+                menus: [
+                    'dashboard', 'data-management', 'attendance-records', 
+                    'leave-approval', 'data-statistics', 'notifications',
+                    'data-export', 'help-center'
+                ],
+                permissions: ['read', 'update', 'approve', 'export']
+            },
+            'teacher': {
+                name: '任课教师',
+                menus: [
+                    'dashboard', 'attendance-records', 'leave-approval',
+                    'data-statistics', 'help-center'
+                ],
+                permissions: ['read', 'update', 'approve']
+            },
+            'student': {
+                name: '学生',
+                menus: [
+                    'dashboard', 'leave-approval', 'help-center'
+                ],
+                permissions: ['read', 'create']
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 密码显示/隐藏切换
+            const togglePassword = document.getElementById('toggle-password');
+            const passwordInput = document.getElementById('password');
+            
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // 切换图标
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+            
+            // 登录表单提交
+            const loginForm = document.getElementById('login-form');
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const role = document.getElementById('user-role').value;
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // 简单验证
+                if (!username) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '登录失败',
+                        text: '请输入账号',
+                        confirmButtonText: '确定'
+                    });
+                    return;
+                }
+                
+                if (!password) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '登录失败',
+                        text: '请输入密码',
+                        confirmButtonText: '确定'
+                    });
+                    return;
+                }
+                
+                // 模拟登录验证
+                Swal.fire({
+                    title: '登录中...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        
+                        // 模拟API请求延迟
+                        setTimeout(() => {
+                            // 这里可以替换为真实的登录验证逻辑
+                            // 简单模拟：用户名和密码不为空即登录成功
+                            if (username && password) {
+                                // 获取角色信息
+                                const userInfo = {
+                                    username: username,
+                                    role: role,
+                                    roleName: rolePermissions[role].name,
+                                    permissions: rolePermissions[role]
+                                };
+                                
+                                // 保存用户信息到本地存储
+                                localStorage.setItem('currentUser', JSON.stringify(userInfo));
+                                
+                                Swal.close();
+                                
+                                // 显示登录成功消息并跳转
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '登录成功',
+                                    text: `欢迎回来，${rolePermissions[role].name} ${username}`,
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then(() => {
+                                    // 跳转到系统首页
+                                    window.location.href = 'index.html';
+                                });
+                            } else {
+                                Swal.close();
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: '登录失败',
+                                    text: '账号或密码错误',
+                                    confirmButtonText: '确定'
+                                });
+                            }
+                        }, 1500);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+    
