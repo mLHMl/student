@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生考勤管理系统 - 首页</title>
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- 配置Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E40AF',
+                        secondary: '#3B82F6',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        info: '#06B6D4',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            .hover-lift {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .hover-lift:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+            .gradient-bg {
+                background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+            }
+            .sidebar-item-active {
+                @apply bg-blue-50 text-primary border-r-4 border-primary;
+            }
+            .modal-backdrop {
+                backdrop-filter: blur(2px);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800">
+    <!-- 顶部导航栏 -->
+    <header class="bg-primary text-white shadow-md fixed w-full z-10 top-0 transition-all duration-300">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- 系统Logo和名称 -->
+                <div class="flex items-center space-x-3">
+                    <i class="fa fa-graduation-cap text-2xl"></i>
+                    <h1 class="text-xl font-bold">学生考勤管理系统</h1>
+                </div>
+                
+                <!-- 日期和通知 -->
+                <div class="flex items-center space-x-6">
+                    <div class="hidden md:block text-sm">
+                        <span id="current-date">2023年10月20日</span>
+                        <span id="current-weekday" class="ml-2">星期五</span>
+                    </div>
+                    <button id="notification-btn" class="hover:text-gray-200 transition-all relative cursor-pointer">
+                        <i class="fa fa-bell-o text-xl"></i>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-danger rounded-full text-xs flex items-center justify-center">5</span>
+                    </button>
+                    <div class="flex items-center space-x-2 cursor-pointer" id="user-menu-btn">
+                        <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover border-2 border-white">
+                        <span>张主任</span>
+                        <i class="fa fa-angle-down text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 侧边导航 -->
+    <aside class="fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-white shadow-md z-20 overflow-y-auto transition-all duration-300">
+        <nav class="py-4">
+            <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                主导航
+            </div>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all sidebar-item-active" data-target="dashboard">
+                <i class="fa fa-tachometer w-5 text-center mr-3"></i>
+                <span>系统首页</span>
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all" data-target="data-management">
+                <i class="fa fa-database w-5 text-center mr-3 text-gray-400"></i>
+                <span>基础数据管理</span>
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all" data-target="attendance-rules">
+                <i class="fa fa-cog w-5 text-center mr-3 text-gray-400"></i>
+                <span>考勤规则设置</span>
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all" data-target="attendance-records">
+                <i class="fa fa-calendar-check-o w-5 text-center mr-3 text-gray-400"></i>
+                <span>日常考勤记录</span>
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all" data-target="leave-approval">
+                <i class="fa fa-pencil-square-o w-5 text-center mr-3 text-gray-400"></i>
+                <span>请假审批</span>
+            </a>
+            
+            <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-4">
+                数据中心
+            </div>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all" data-target="data-statistics">
+                <i class="fa fa-bar-chart w-5 text-center mr-3 text-gray-400"></i>
+                <span>考勤数据统计</span>
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all" data-target="notifications">
+                <i class="fa fa-bell w-5 text-center mr-3 text-gray-400"></i>
+                <span>预警与通知</span>
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all" data-target="data-export">
+                <i class="fa fa-search w-5 text-center mr-3 text-gray-400"></i>
+                <span>数据查询与导出</span>
+            </a>
+            
+            <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-4">
+                系统管理
+            </div>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all" data-target="permission-management">
+                <i class="fa fa-user-circle-o w-5 text-center mr-3 text-gray-400"></i>
+                <span>权限管理</span>
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all" data-target="operation-logs">
+                <i class="fa fa-history w-5 text-center mr-3 text-gray-400"></i>
+                <span>操作日志</span>
+            </a>
+            <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all" data-target="help-center">
+                <i class="fa fa-question-circle-o w-5 text-center mr-3 text-gray-400"></i>
+                <span>帮助中心</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 ml-64 pt-20 pb-16 transition-all duration-300" id="main-content">
+        <!-- 欢迎区域 -->
+        <div class="gradient-bg rounded-lg shadow-lg p-6 mb-8 text-white">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                    <h2 class="text-2xl font-bold mb-2">欢迎使用学生考勤管理系统</h2>
+                    <p class="opacity-90">今天是 <span id="welcome-date">2023年10月20日</span>，星期五。当前为 <span class="font-medium">2023-2024学年第一学期</span></p>
+                </div>
+                <div class="mt-4 md:mt-0 flex space-x-3">
+                    <button id="quick-add-btn" class="bg-white text-primary px-4 py-2 rounded-md flex items-center hover:bg-gray-100 transition-all">
+                        <i class="fa fa-plus mr-2"></i>
+                        <span>快速添加</span>
+                    </button>
+                    <button id="data-import-btn" class="bg-blue-700 text-white px-4 py-2 rounded-md flex items-center hover:bg-blue-800 transition-all">
+                        <i class="fa fa-file-excel-o mr-2"></i>
+                        <span>数据导入</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 快捷功能区 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg p-6 card-shadow hover-lift cursor-pointer" id="student-checkin-card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-gray-700">学生签到</h3>
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                        <i class="fa fa-qrcode"></i>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">生成课程二维码，快速完成学生签到</p>
+                <a href="#" class="text-primary hover:text-primary/80 text-sm flex items-center">
+                    <span>立即生成</span>
+                    <i class="fa fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 card-shadow hover-lift cursor-pointer" id="leave-approval-card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-gray-700">请假审批</h3>
+                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-success">
+                        <i class="fa fa-file-text-o"></i>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">处理待审批的请假申请，共5条待处理</p>
+                <a href="#" class="text-success hover:text-success/80 text-sm flex items-center">
+                    <span>查看详情</span>
+                    <i class="fa fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 card-shadow hover-lift cursor-pointer" id="supplement-check-card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-gray-700">补签处理</h3>
+                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-warning">
+                        <i class="fa fa-pencil"></i>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">处理学生补签申请，共3条待审核</p>
+                <a href="#" class="text-warning hover:text-warning/80 text-sm flex items-center">
+                    <span>处理申请</span>
+                    <i class="fa fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 card-shadow hover-lift cursor-pointer" id="data-export-card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-gray-700">数据导出</h3>
+                    <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                        <i class="fa fa-download"></i>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">导出各类考勤报表，支持多格式选择</p>
+                <a href="#" class="text-purple-600 hover:text-purple-700 text-sm flex items-center">
+                    <span>导出报表</span>
+                    <i class="fa fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+        
+        <!-- 数据概览 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg p-6 card-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-sm font-medium text-gray-500">总学生数</h3>
+                    <i class="fa fa-users text-primary text-xl"></i>
+                </div>
+                <p class="text-3xl font-bold">1,286</p>
+                <p class="text-xs text-success mt-1 flex items-center">
+                    <i class="fa fa-arrow-up mr-1"></i> 较上学期增长 3.2%
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 card-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-sm font-medium text-gray-500">本周出勤率</h3>
+                    <i class="fa fa-check-circle text-success text-xl"></i>
+                </div>
+                <p class="text-3xl font-bold">92.5%</p>
+                <p class="text-xs text-danger mt-1 flex items-center">
+                    <i class="fa fa-arrow-down mr-1"></i> 较上周下降 1.8%
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 card-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-sm font-medium text-gray-500">本月异常数</h3>
+                    <i class="fa fa-exclamation-triangle text-warning text-xl"></i>
+                </div>
+                <p class="text-3xl font-bold">187</p>
+                <p class="text-xs text-success mt-1 flex items-center">
+                    <i class="fa fa-arrow-down mr-1"></i> 较上月下降 8.3%
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6 card-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-sm font-medium text-gray-500">待处理请假</h3>
+                    <i class="fa fa-clock-o text-info text-xl"></i>
+                </div>
+                <p class="text-3xl font-bold">5</p>
+                <p class="text-xs text-warning mt-1 flex items-center">
+                    <i class="fa fa-arrow-up mr-1"></i> 较昨日增加 2 条
+                </p>
+            </div>
+        </div>
+        
+        <!-- 图表和数据表格 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <!-- 出勤率趋势图 -->
+            <div class="lg:col-span-2 bg-white rounded-lg p-6 card-shadow">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-semibold text-lg">出勤率趋势</h3>
+                    <div class="flex space-x-2">
+                        <button class="period-btn px-3 py-1 text-sm bg-primary text-white rounded-md" data-period="week">周</button>
+                        <button class="period-btn px-3 py-1 text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md" data-period="month">月</button>
+                        <button class="period-btn px-3 py-1 text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md" data-period="term">学期</button>
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="attendance-chart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 考勤类型占比 -->
+            <div class="bg-white rounded-lg p-6 card-shadow">
+                <h3 class="font-semibold text-lg mb-6">考勤类型占比</h3>
+                <div class="h-64">
+                    <canvas id="attendance-type-chart"></canvas>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-success mr-2"></span>
+                        <span class="text-sm text-gray-600">正常 (82%)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-warning mr-2"></span>
+                        <span class="text-sm text-gray-600">迟到 (8%)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-danger mr-2"></span>
+                        <span class="text-sm text-gray-600">旷课 (5%)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-info mr-2"></span>
+                        <span class="text-sm text-gray-600">请假 (5%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 最近动态和待办事项 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 最近考勤动态 -->
+            <div class="bg-white rounded-lg p-6 card-shadow">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-semibold text-lg">最近考勤动态</h3>
+                    <a href="#" class="text-primary text-sm hover:underline cursor-pointer">查看全部</a>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start pb-4 border-b border-gray-100 hover:bg-gray-50 p-2 -m-2 rounded transition-all cursor-pointer">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-success mr-3 mt-1 flex-shrink-0">
+                            <i class="fa fa-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm"><span class="font-medium">23级计算机1班</span> 完成了高等数学课程的签到，出勤率 96%</p>
+                            <p class="text-xs text-gray-500 mt-1">今天 09:45</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start pb-4 border-b border-gray-100 hover:bg-gray-50 p-2 -m-2 rounded transition-all cursor-pointer">
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-warning mr-3 mt-1 flex-shrink-0">
+                            <i class="fa fa-exclamation"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm"><span class="font-medium">22级会计2班</span> 英语课程出勤率较低，仅为 78%</p>
+                            <p class="text-xs text-gray-500 mt-1">今天 08:30</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start pb-4 border-b border-gray-100 hover:bg-gray-50 p-2 -m-2 rounded transition-all cursor-pointer">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3 mt-1 flex-shrink-0">
+                            <i class="fa fa-pencil"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm"><span class="font-medium">张三</span> 提交了补签申请，等待审批</p>
+                            <p class="text-xs text-gray-500 mt-1">昨天 16:20</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start hover:bg-gray-50 p-2 -m-2 rounded transition-all cursor-pointer">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-3 mt-1 flex-shrink-0">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm"><span class="font-medium">李四</span> 请假3天（病假），已获批准</p>
+                            <p class="text-xs text-gray-500 mt-1">昨天 10:15</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 待办事项 -->
+            <div class="bg-white rounded-lg p-6 card-shadow">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-semibold text-lg">待办事项</h3>
+                    <a href="#" class="text-primary text-sm hover:underline cursor-pointer">查看全部</a>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center p-3 border border-gray-100 rounded-lg hover:border-primary/30 transition-all">
+                        <input type="checkbox" class="todo-checkbox w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded mr-3">
+                        <div class="flex-1">
+                            <p class="text-sm">审核王五的补签申请（10月18日）</p>
+                            <p class="text-xs text-gray-500 mt-0.5">截止时间：今天 18:00</p>
+                        </div>
+                        <span class="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">紧急</span>
+                    </div>
+                    <div class="flex items-center p-3 border border-gray-100 rounded-lg hover:border-primary/30 transition-all">
+                        <input type="checkbox" class="todo-checkbox w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded mr-3">
+                        <div class="flex-1">
+                            <p class="text-sm">处理3条学生请假申请</p>
+                            <p class="text-xs text-gray-500 mt-0.5">截止时间：明天 12:00</p>
+                        </div>
+                        <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">待办</span>
+                    </div>
+                    <div class="flex items-center p-3 border border-gray-100 rounded-lg hover:border-primary/30 transition-all">
+                        <input type="checkbox" class="todo-checkbox w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded mr-3">
+                        <div class="flex-1">
+                            <p class="text-sm">导出23级计算机系10月考勤报表</p>
+                            <p class="text-xs text-gray-500 mt-0.5">截止时间：10月25日</p>
+                        </div>
+                        <span class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">常规</span>
+                    </div>
+                    <div class="flex items-center p-3 border border-gray-100 rounded-lg hover:border-primary/30 transition-all">
+                        <input type="checkbox" class="todo-checkbox w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded mr-3">
+                        <div class="flex-1">
+                            <p class="text-sm">更新本学期课程考勤规则</p>
+                            <p class="text-xs text-gray-500 mt-0.5">截止时间：10月30日</p>
+                        </div>
+                        <span class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">常规</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 通知弹窗 -->
+    <div id="notification-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800">通知消息</h3>
+                <button id="close-notification" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="divide-y divide-gray-100">
+                <div class="p-4 hover:bg-gray-50 transition-all">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <div class="w-2 h-2 bg-danger rounded-full mt-2.5"></div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm">22级会计2班英语课程出勤率低于80%，请关注</p>
+                            <p class="text-xs text-gray-500 mt-1">今天 08:30</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 hover:bg-gray-50 transition-all">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <div class="w-2 h-2 bg-danger rounded-full mt-2.5"></div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm">张三已连续迟到3次，需进行约谈</p>
+                            <p class="text-xs text-gray-500 mt-1">昨天 16:45</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 hover:bg-gray-50 transition-all">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <div class="w-2 h-2 bg-danger rounded-full mt-2.5"></div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm">李四提交了3天病假申请，等待您的审批</p>
+                            <p class="text-xs text-gray-500 mt-1">昨天 10:15</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 hover:bg-gray-50 transition-all">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <!-- 已读无标记 -->
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm">系统已完成上周考勤数据备份</p>
+                            <p class="text-xs text-gray-500 mt-1">2023-10-15</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 hover:bg-gray-50 transition-all">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <!-- 已读无标记 -->
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm">新功能"批量导入学生信息"已上线</p>
+                            <p class="text-xs text-gray-500 mt-1">2023-10-10</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 rounded-b-lg">
+                <button class="w-full py-2 text-center text-primary text-sm hover:text-primary/80">
+                    查看全部通知
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户菜单下拉框 -->
+    <div id="user-menu" class="absolute right-4 top-16 w-48 bg-white rounded-lg shadow-lg py-1 z-50 hidden">
+        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <i class="fa fa-user-o mr-2"></i>个人资料
+        </a>
+        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <i class="fa fa-cog mr-2"></i>账户设置
+        </a>
+        <div class="border-t border-gray-100 my-1"></div>
+        <a href="#" class="block px-4 py-2 text-sm text-danger hover:bg-gray-100">
+            <i class="fa fa-sign-out mr-2"></i>退出登录
+        </a>
+    </div>
+
+    <!-- 学生签到模态框 -->
+    <div id="checkin-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800">学生签到</h3>
+                <button class="close-modal text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">选择课程</label>
+                    <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                        <option value="">-- 请选择课程 --</option>
+                        <option value="math">高等数学 - 23级计算机1班</option>
+                        <option value="english">大学英语 - 22级会计2班</option>
+                        <option value="programming">程序设计 - 23级计算机1班</option>
+                        <option value="accounting">会计学原理 - 22级会计1班</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">签到有效期</label>
+                    <div class="flex items-center space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="validity" value="10" class="text-primary focus:ring-primary" checked>
+                            <span class="ml-2 text-sm">10分钟</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="validity" value="30" class="text-primary focus:ring-primary">
+                            <span class="ml-2 text-sm">30分钟</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="validity" value="60" class="text-primary focus:ring-primary">
+                            <span class="ml-2 text-sm">1小时</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="validity" value="custom" class="text-primary focus:ring-primary">
+                            <span class="ml-2 text-sm">自定义</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center py-4 border border-dashed border-gray-300 rounded-lg">
+                    <div class="text-center">
+                        <img src="https://picsum.photos/id/237/200/200" alt="签到二维码" class="w-48 h-48 mx-auto mb-4">
+                        <p class="text-sm text-gray-500">请学生扫描上方二维码进行签到</p>
+                        <p class="text-xs text-gray-400 mt-2">签到码将在 <span class="text-primary font-medium">09:50</span> 过期</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end space-x-3">
+                <button class="close-modal px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition-all">
+                    取消
+                </button>
+                <button class="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-all">
+                    刷新二维码
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据导入模态框 -->
+    <div id="import-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800">数据导入</h3>
+                <button class="close-modal text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">导入类型</label>
+                    <select id="import-type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                        <option value="students">学生信息</option>
+                        <option value="teachers">教师信息</option>
+                        <option value="courses">课程信息</option>
+                        <option value="attendance">考勤记录</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">上传文件</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-all cursor-pointer" id="file-drop-area">
+                        <i class="fa fa-cloud-upload text-3xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-500 mb-1">拖放文件到此处或点击上传</p>
+                        <p class="text-xs text-gray-400">支持 .xlsx, .xls 格式，最大 10MB</p>
+                        <input type="file" id="file-upload" class="hidden" accept=".xlsx,.xls">
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                    <div class="flex">
+                        <i class="fa fa-info-circle text-primary mt-0.5 mr-3"></i>
+                        <div>
+                            <p class="text-sm font-medium text-primary mb-1">导入提示</p>
+                            <p class="text-xs text-gray-600">
+                                请使用系统提供的模板进行数据填写，<br>
+                                <a href="#" class="text-primary hover:underline">点击下载模板</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end space-x-3">
+                <button class="close-modal px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition-all">
+                    取消
+                </button>
+                <button id="confirm-import" class="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-all" disabled>
+                    开始导入
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 设置当前日期
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            
+            const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+            const weekdayStr = weekdays[now.getDay()];
+            
+            document.getElementById('current-date').textContent = dateStr;
+            document.getElementById('current-weekday').textContent = weekdayStr;
+            document.getElementById('welcome-date').textContent = dateStr;
+            
+            // 初始化出勤率趋势图
+            const attendanceCtx = document.getElementById('attendance-chart').getContext('2d');
+            const attendanceChart = new Chart(attendanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '全校平均出勤率',
+                        data: [94.2, 93.5, 91.8, 95.3, 92.5, 88.7, 85.2],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }, {
+                        label: '计算机系出勤率',
+                        data: [92.8, 91.5, 90.2, 93.7, 91.2, 87.5, 82.3],
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 80,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 初始化考勤类型占比图
+            const typeCtx = document.getElementById('attendance-type-chart').getContext('2d');
+            const typeChart = new Chart(typeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['正常', '迟到', '旷课', '请假'],
+                    datasets: [{
+                        data: [82, 8, 5, 5],
+                        backgroundColor: [
+                            '#10B981', // 成功绿
+                            '#F59E0B', // 警告黄
+                            '#EF4444', // 危险红
+                            '#06B6D4'  // 信息蓝
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // 侧边栏导航项点击事件
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有项的活跃状态
+                    sidebarItems.forEach(i => i.classList.remove('sidebar-item-active'));
+                    
+                    // 添加当前项的活跃状态
+                    this.classList.add('sidebar-item-active');
+                    
+                    // 获取目标模块并显示提示
+                    const target = this.getAttribute('data-target');
+                    showModuleNotification(target);
+                });
+            });
+
+            // 通知按钮点击事件
+            const notificationBtn = document.getElementById('notification-btn');
+            const notificationModal = document.getElementById('notification-modal');
+            const closeNotification = document.getElementById('close-notification');
+            
+            notificationBtn.addEventListener('click', function() {
+                notificationModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            });
+            
+            closeNotification.addEventListener('click', function() {
+                notificationModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            });
+
+            // 用户菜单点击事件
+            const userMenuBtn = document.getElementById('user-menu-btn');
+            const userMenu = document.getElementById('user-menu');
+            
+            userMenuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userMenu.classList.toggle('hidden');
+            });
+            
+            // 点击其他区域关闭用户菜单
+            document.addEventListener('click', function() {
+                userMenu.classList.add('hidden');
+            });
+            
+            // 阻止用户菜单内部点击事件冒泡
+            userMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // 快捷功能卡片点击事件
+            document.getElementById('student-checkin-card').addEventListener('click', function() {
+                document.getElementById('checkin-modal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            });
+            
+            document.getElementById('leave-approval-card').addEventListener('click', function() {
+                showModuleNotification('leave-approval');
+            });
+            
+            document.getElementById('supplement-check-card').addEventListener('click', function() {
+                showModuleNotification('supplement-check');
+            });
+            
+            document.getElementById('data-export-card').addEventListener('click', function() {
+                showModuleNotification('data-export');
+            });
+
+            // 数据导入按钮点击事件
+            document.getElementById('data-import-btn').addEventListener('click', function() {
+                document.getElementById('import-modal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            });
+
+            // 关闭模态框按钮事件
+            const closeModalButtons = document.querySelectorAll('.close-modal');
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const modal = this.closest('[id$="-modal"]');
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = '';
+                });
+            });
+
+            // 文件上传区域事件
+            const fileDropArea = document.getElementById('file-drop-area');
+            const fileUpload = document.getElementById('file-upload');
+            const confirmImportBtn = document.getElementById('confirm-import');
+            
+            fileDropArea.addEventListener('click', function() {
+                fileUpload.click();
+            });
+            
+            fileUpload.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    // 显示已选择的文件名
+                    Swal.fire({
+                        icon: 'info',
+                        title: '文件已选择',
+                        text: `已选择文件: ${this.files[0].name}`,
+                        showConfirmButton: true,
+                        timer: 2000
+                    });
+                    
+                    // 启用导入按钮
+                    confirmImportBtn.removeAttribute('disabled');
+                    confirmImportBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            });
+            
+            // 阻止拖放默认行为
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                fileDropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            // 高亮拖放区域
+            ['dragenter', 'dragover'].forEach(eventName => {
+                fileDropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                fileDropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                fileDropArea.classList.add('border-primary', 'bg-blue-50');
+            }
+            
+            function unhighlight() {
+                fileDropArea.classList.remove('border-primary', 'bg-blue-50');
+            }
+            
+            // 处理文件拖放
+            fileDropArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    // 显示已拖放的文件名
+                    Swal.fire({
+                        icon: 'info',
+                        title: '文件已选择',
+                        text: `已选择文件: ${files[0].name}`,
+                        showConfirmButton: true,
+                        timer: 2000
+                    });
+                    
+                    // 启用导入按钮
+                    confirmImportBtn.removeAttribute('disabled');
+                    confirmImportBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            // 确认导入按钮点击事件
+            confirmImportBtn.addEventListener('click', function() {
+                const importType = document.getElementById('import-type').value;
+                let typeText = '';
+                
+                switch(importType) {
+                    case 'students': typeText = '学生信息'; break;
+                    case 'teachers': typeText = '教师信息'; break;
+                    case 'courses': typeText = '课程信息'; break;
+                    case 'attendance': typeText = '考勤记录'; break;
+                }
+                
+                // 显示导入进度
+                Swal.fire({
+                    title: '正在导入数据',
+                    html: `正在导入${typeText}，请稍候...`,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        
+                        // 模拟导入过程
+                        setTimeout(() => {
+                            Swal.close();
+                            
+                            // 显示导入成功消息
+                            Swal.fire({
+                                icon: 'success',
+                                title: '导入成功',
+                                text: `${typeText}已成功导入系统`,
+                                confirmButtonText: '确定'
+                            }).then(() => {
+                                document.getElementById('import-modal').classList.add('hidden');
+                                document.body.style.overflow = '';
+                                
+                                // 重置导入按钮状态
+                                confirmImportBtn.setAttribute('disabled', 'true');
+                                fileUpload.value = '';
+                            });
+                        }, 2000);
+                    }
+                });
+            });
+
+            // 待办事项复选框事件
+            const todoCheckboxes = document.querySelectorAll('.todo-checkbox');
+            todoCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const todoItem = this.closest('div[class*="flex items-center p-3"]');
+                    const todoText = todoItem.querySelector('p.text-sm');
+                    
+                    if (this.checked) {
+                        todoText.classList.add('line-through', 'text-gray-400');
+                        
+                        // 显示完成动画
+                        Swal.fire({
+                            icon: 'success',
+                            title: '已完成',
+                            text: '该任务已标记为完成',
+                            showConfirmButton: false,
+                            timer: 1000
+                        });
+                    } else {
+                        todoText.classList.remove('line-through', 'text-gray-400');
+                    }
+                });
+            });
+
+            // 出勤率图表周期切换
+            const periodBtns = document.querySelectorAll('.period-btn');
+            periodBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 更新按钮样式
+                    periodBtns.forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white');
+                        b.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                    });
+                    
+                    this.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                    this.classList.add('bg-primary', 'text-white');
+                    
+                    // 更新图表数据
+                    const period = this.getAttribute('data-period');
+                    updateAttendanceChart(period);
+                });
+            });
+
+            // 显示模块通知
+            function showModuleNotification(module) {
+                let moduleName = '';
+                
+                switch(module) {
+                    case 'dashboard': moduleName = '系统首页'; break;
+                    case 'data-management': moduleName = '基础数据管理'; break;
+                    case 'attendance-rules': moduleName = '考勤规则设置'; break;
+                    case 'attendance-records': moduleName = '日常考勤记录'; break;
+                    case 'leave-approval': moduleName = '请假审批'; break;
+                    case 'data-statistics': moduleName = '考勤数据统计'; break;
+                    case 'notifications': moduleName = '预警与通知'; break;
+                    case 'data-export': moduleName = '数据查询与导出'; break;
+                    case 'permission-management': moduleName = '权限管理'; break;
+                    case 'operation-logs': moduleName = '操作日志'; break;
+                    case 'help-center': moduleName = '帮助中心'; break;
+                    case 'supplement-check': moduleName = '补签处理'; break;
+                }
+                
+                Swal.fire({
+                    icon: 'info',
+                    title: '进入模块',
+                    text: `即将进入${moduleName}模块`,
+                    confirmButtonText: '确定'
+                });
+            }
+
+            // 更新出勤率图表数据
+            function updateAttendanceChart(period) {
+                let labels, data1, data2;
+                
+                switch(period) {
+                    case 'week':
+                        labels = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+                        data1 = [94.2, 93.5, 91.8, 95.3, 92.5, 88.7, 85.2];
+                        data2 = [92.8, 91.5, 90.2, 93.7, 91.2, 87.5, 82.3];
+                        break;
+                    case 'month':
+                        labels = ['第1周', '第2周', '第3周', '第4周'];
+                        data1 = [93.5, 92.8, 94.2, 92.5];
+                        data2 = [91.2, 90.5, 92.7, 91.2];
+                        break;
+                    case 'term':
+                        labels = ['9月', '10月', '11月', '12月', '1月'];
+                        data1 = [91.2, 92.5, 93.8, 92.1, 90.5];
+                        data2 = [89.5, 91.2, 92.3, 90.1, 88.7];
+                        break;
+                }
+                
+                // 更新图表数据
+                attendanceChart.data.labels = labels;
+                attendanceChart.data.datasets[0].data = data1;
+                attendanceChart.data.datasets[1].data = data2;
+                attendanceChart.update();
+            }
+        });
+    </script>
+</body>
+</html>
+    
