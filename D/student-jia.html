@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发起请假 - 校园考勤系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- 配置Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            warning: '#FF7D00',
+            danger: '#F53F3F',
+            success: '#00B42A',
+            neutral: {
+              100: '#F2F3F5',
+              200: '#E5E6EB',
+              300: '#C9CDD4',
+              400: '#86909C',
+              500: '#4E5969',
+              600: '#272E3B',
+              700: '#1D2129',
+            }
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .input-focus {
+        @apply focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-inter bg-neutral-100 text-neutral-700 min-h-screen flex flex-col">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300">
+    <div class="container mx-auto px-4 md:px-6">
+      <div class="flex items-center justify-between h-16">
+        <!-- 左侧Logo和标题 -->
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-white">
+            <i class="fa fa-graduation-cap text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-semibold text-neutral-700">校园考勤系统</h1>
+            <p class="text-xs text-neutral-400">学生端</p>
+          </div>
+        </div>
+        
+        <!-- 右侧用户信息 -->
+        <div class="flex items-center space-x-6">
+          <button class="text-neutral-500 hover:text-primary transition-colors relative">
+            <i class="fa fa-bell-o text-xl"></i>
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-danger rounded-full text-white text-xs flex items-center justify-center">1</span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <img src="https://picsum.photos/id/1012/40/40" alt="学生头像" class="w-8 h-8 rounded-full object-cover">
+            <div class="hidden md:block">
+              <p class="text-sm font-medium">李小明</p>
+              <p class="text-xs text-neutral-400">计算机科学与技术 | 2021级</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <!-- 侧边栏导航 -->
+    <aside class="w-64 bg-white shadow-sm hidden md:block transition-all duration-300">
+      <nav class="py-6 px-4">
+        <div class="mb-6">
+          <p class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 pl-3">考勤管理</p>
+          <ul class="space-y-1">
+            <li>
+              <a href="#" class="flex items-center px-3 py-2.5 text-sm rounded-lg text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+                <i class="fa fa-qrcode w-5 h-5 mr-3"></i>
+                <span>课程签到</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-center px-3 py-2.5 text-sm rounded-lg bg-primary/10 text-primary font-medium">
+                <i class="fa fa-calendar-o w-5 h-5 mr-3"></i>
+                <span>请假申请</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-center px-3 py-2.5 text-sm rounded-lg text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+                <i class="fa fa-pencil-square-o w-5 h-5 mr-3"></i>
+                <span>补签申请</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-center px-3 py-2.5 text-sm rounded-lg text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+                <i class="fa fa-history w-5 h-5 mr-3"></i>
+                <span>我的考勤记录</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="mb-6">
+          <p class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 pl-3">课程信息</p>
+          <ul class="space-y-1">
+            <li>
+              <a href="#" class="flex items-center px-3 py-2.5 text-sm rounded-lg text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+                <i class="fa fa-book w-5 h-5 mr-3"></i>
+                <span>我的课程表</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-center px-3 py-2.5 text-sm rounded-lg text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+                <i class="fa fa-user-o w-5 h-5 mr-3"></i>
+                <span>授课教师</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+        <div>
+          <p class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 pl-3">个人中心</p>
+          <ul class="space-y-1">
+            <li>
+              <a href="#" class="flex items-center px-3 py-2.5 text-sm rounded-lg text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+                <i class="fa fa-user-circle-o w-5 h-5 mr-3"></i>
+                <span>个人信息</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-center px-3 py-2.5 text-sm rounded-lg text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+                <i class="fa fa-cog w-5 h-5 mr-3"></i>
+                <span>设置</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 overflow-y-auto bg-neutral-100 p-4 md:p-6">
+      <div class="max-w-3xl mx-auto">
+        <!-- 页面标题 -->
+        <div class="mb-6">
+          <div class="flex items-center">
+            <button class="text-neutral-500 hover:text-primary mr-4 md:hidden">
+              <i class="fa fa-bars text-xl"></i>
+            </button>
+            <h2 class="text-[clamp(1.25rem,3vw,1.75rem)] font-bold text-neutral-700">发起请假申请</h2>
+          </div>
+          <p class="text-neutral-500 mt-1">请填写请假信息，提交后将按流程进行审批</p>
+        </div>
+        
+        <!-- 请假表单卡片 -->
+        <div class="bg-white rounded-xl overflow-hidden card-shadow mb-6">
+          <div class="p-5 border-b border-neutral-100">
+            <h3 class="font-semibold text-neutral-700">请假信息</h3>
+            <p class="text-sm text-neutral-500 mt-1">带 <span class="text-danger">*</span> 为必填项</p>
+          </div>
+          
+          <form id="leaveApplicationForm" class="p-5 space-y-5">
+            <!-- 请假类型 -->
+            <div>
+              <label for="leaveType" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                请假类型 <span class="text-danger">*</span>
+              </label>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <label class="relative cursor-pointer">
+                  <input type="radio" name="leaveType" value="sick" class="sr-only peer" checked>
+                  <div class="border-2 border-neutral-200 rounded-lg p-3 text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                    <i class="fa fa-medkit text-primary text-xl mb-1"></i>
+                    <p class="text-sm">病假</p>
+                  </div>
+                </label>
+                
+                <label class="relative cursor-pointer">
+                  <input type="radio" name="leaveType" value="personal" class="sr-only peer">
+                  <div class="border-2 border-neutral-200 rounded-lg p-3 text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                    <i class="fa fa-user-o text-primary text-xl mb-1"></i>
+                    <p class="text-sm">事假</p>
+                  </div>
+                </label>
+                
+                <label class="relative cursor-pointer">
+                  <input type="radio" name="leaveType" value="study" class="sr-only peer">
+                  <div class="border-2 border-neutral-200 rounded-lg p-3 text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                    <i class="fa fa-book text-primary text-xl mb-1"></i>
+                    <p class="text-sm">学业假</p>
+                  </div>
+                </label>
+                
+                <label class="relative cursor-pointer">
+                  <input type="radio" name="leaveType" value="other" class="sr-only peer">
+                  <div class="border-2 border-neutral-200 rounded-lg p-3 text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                    <i class="fa fa-ellipsis-h text-primary text-xl mb-1"></i>
+                    <p class="text-sm">其他</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+            
+            <!-- 请假时间 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label for="startDate" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                  开始时间 <span class="text-danger">*</span>
+                </label>
+                <div class="relative">
+                  <input type="datetime-local" id="startDate" class="w-full px-3 py-2.5 border border-neutral-200 rounded-lg text-sm input-focus">
+                </div>
+              </div>
+              
+              <div>
+                <label for="endDate" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                  结束时间 <span class="text-danger">*</span>
+                </label>
+                <div class="relative">
+                  <input type="datetime-local" id="endDate" class="w-full px-3 py-2.5 border border-neutral-200 rounded-lg text-sm input-focus">
+                </div>
+              </div>
+            </div>
+            
+            <!-- 请假天数计算 -->
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 mb-1.5">
+                请假时长
+              </label>
+              <div class="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                <p class="text-neutral-700"><span id="leaveDuration" class="font-medium">0</span> 天 <span id="leaveHours" class="font-medium">0</span> 小时</p>
+                <p class="text-xs text-neutral-500 mt-1">
+                  <i class="fa fa-info-circle mr-1"></i>
+                  系统将根据请假时间自动计算时长，超过1天的假期需院系主任审批
+                </p>
+              </div>
+            </div>
+            
+            <!-- 涉及课程 -->
+            <div>
+              <label for="relatedCourses" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                涉及课程 <span class="text-danger">*</span>
+              </label>
+              <div class="relative">
+                <select id="relatedCourses" multiple class="w-full px-3 py-2.5 border border-neutral-200 rounded-lg text-sm input-focus h-32">
+                  <option value="1">数据结构与算法 - 2023-05-15 08:00</option>
+                  <option value="2">计算机网络 - 2023-05-15 14:00</option>
+                  <option value="3">操作系统原理 - 2023-05-16 10:00</option>
+                  <option value="4">人工智能导论 - 2023-05-17 08:00</option>
+                </select>
+                <div class="absolute right-3 top-3 text-neutral-400 pointer-events-none">
+                  <i class="fa fa-chevron-down"></i>
+                </div>
+              </div>
+              <p class="text-xs text-neutral-500 mt-1">按住Ctrl键可多选，选择您请假期间将缺席的课程</p>
+            </div>
+            
+            <!-- 请假事由 -->
+            <div>
+              <label for="leaveReason" class="block text-sm font-medium text-neutral-700 mb-1.5">
+                请假事由 <span class="text-danger">*</span>
+              </label>
+              <textarea id="leaveReason" rows="4" class="w-full px-3 py-2.5 border border-neutral-200 rounded-lg text-sm input-focus" placeholder="请详细描述请假原因..."></textarea>
+            </div>
+            
+            <!-- 证明材料上传 -->
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 mb-1.5">
+                证明材料
+              </label>
+              <div class="border-2 border-dashed border-neutral-200 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                <i class="fa fa-cloud-upload text-3xl text-neutral-400 mb-3"></i>
+                <p class="text-sm text-neutral-600 mb-2">点击或拖拽文件至此处上传</p>
+                <p class="text-xs text-neutral-500 mb-4">支持JPG、PNG、PDF格式，最大不超过10MB</p>
+                <label class="inline-block px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium cursor-pointer hover:bg-primary/20 transition-colors">
+                  <i class="fa fa-folder-open-o mr-1"></i> 选择文件
+                  <input type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.pdf">
+                </label>
+              </div>
+              
+              <!-- 已上传文件列表 -->
+              <div class="mt-3 hidden" id="fileList">
+                <p class="text-sm font-medium text-neutral-700 mb-2">已上传文件：</p>
+                <div class="space-y-2">
+                  <div class="flex items-center
