@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学生考勤管理系统 - 账号管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- 配置Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            warning: '#FF7D00',
+            danger: '#F53F3F',
+            success: '#00B42A',
+            gray: {
+              100: '#F2F3F5',
+              200: '#E5E6EB',
+              300: '#C9CDD4',
+              400: '#86909C',
+              500: '#4E5969',
+              600: '#272E3B',
+              700: '#1D2129',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .transition-all-300 {
+        transition: all 300ms ease-in-out;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-700 min-h-screen flex flex-col">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <!-- 左侧Logo和标题 -->
+        <div class="flex items-center space-x-3">
+          <div class="text-primary text-2xl">
+            <i class="fa fa-graduation-cap"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-semibold text-gray-700">学生考勤管理系统</h1>
+            <p class="text-xs text-gray-400">高效·精准·便捷</p>
+          </div>
+        </div>
+        
+        <!-- 右侧用户信息和操作 -->
+        <div class="flex items-center space-x-6">
+          <button class="text-gray-500 hover:text-primary transition-all-300 relative">
+            <i class="fa fa-bell-o"></i>
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-danger rounded-full text-white text-xs flex items-center justify-center">1</span>
+          </button>
+          <button class="text-gray-500 hover:text-primary transition-all-300">
+            <i class="fa fa-cog"></i>
+          </button>
+          <div class="flex items-center space-x-2">
+            <img src="https://picsum.photos/id/1005/40/40" alt="超级管理员头像" class="w-8 h-8 rounded-full object-cover">
+            <div>
+              <p class="text-sm font-medium">系统管理员</p>
+              <p class="text-xs text-gray-400">超级管理员</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体内容 -->
+  <main class="flex-1 container mx-auto px-4 py-6">
+    <!-- 面包屑导航 -->
+    <div class="text-sm mb-6">
+      <a href="#" class="text-gray-500 hover:text-primary">首页</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <a href="#" class="text-gray-500 hover:text-primary">系统管理</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <a href="#" class="text-gray-500 hover:text-primary">权限管理</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <span class="text-primary">账号管理</span>
+    </div>
+    
+    <!-- 页面标题 -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div>
+        <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-700">账号管理</h2>
+        <p class="text-gray-400 mt-1">管理系统用户账号，包括新增、编辑、冻结和重置密码</p>
+      </div>
+      <div class="mt-4 md:mt-0 flex space-x-3">
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 flex items-center">
+          <i class="fa fa-download mr-2"></i>导出账号列表
+        </button>
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 flex items-center">
+          <i class="fa fa-upload mr-2"></i>批量导入
+        </button>
+        <button class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-all-300 flex items-center">
+          <i class="fa fa-plus mr-2"></i>新增账号
+        </button>
+      </div>
+    </div>
+    
+    <!-- 统计卡片 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-lg p-5 card-shadow">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-400 text-sm">总账号数</p>
+            <h3 class="text-2xl font-bold mt-1">5564</h3>
+            <p class="text-primary text-sm mt-2 flex items-center">
+              <i class="fa fa-arrow-up mr-1"></i>较上月增加128
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            <i class="fa fa-user-o"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-5 card-shadow">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-400 text-sm">活跃账号</p>
+            <h3 class="text-2xl font-bold mt-1">5216</h3>
+            <p class="text-success text-sm mt-2 flex items-center">
+              <i class="fa fa-check-circle mr-1"></i>活跃度93.7%
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success">
+            <i class="fa fa-user"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-5 card-shadow">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-400 text-sm">冻结账号</p>
+            <h3 class="text-2xl font-bold mt-1">348</h3>
+            <p class="text-warning text-sm mt-2 flex items-center">
+              <i class="fa fa-arrow-up mr-1"></i>较上月增加42
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+            <i class="fa fa-user-times"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-5 card-shadow">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-400 text-sm">待审核账号</p>
+            <h3 class="text-2xl font-bold mt-1">15</h3>
+            <p class="text-gray-500 text-sm mt-2 flex items-center">
+              <i class="fa fa-clock-o mr-1"></i>平均审核时间8小时
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+            <i class="fa fa-user-plus"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 筛选和搜索 -->
+    <div class="bg-white rounded-lg p-5 card-shadow mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">账号状态</label>
+          <div class="relative">
+            <select class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none">
+              <option value="all" selected>全部状态</option>
+              <option value="active">正常</option>
+              <option value="frozen">已冻结</option>
+              <option value="pending">待审核</option>
+            </select>
+            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">所属角色</label>
+          <div class="relative">
+            <select class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none">
+              <option value="all" selected>全部角色</option>
+              <option value="admin">超级管理员</option>
+              <option value="dept">院系管理员</option>
+              <option value="teacher">班主任</option>
+              <option value="instructor">任课教师</option>
+              <option value="student">学生</option>
+            </select>
+            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">所属院系</label>
+          <div class="relative">
+            <select class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none">
+              <option value="all" selected>全部院系</option>
+              <option value="math">数学系</option>
+              <option value="physics">物理系</option>
+              <option value="english">英语系</option>
+              <option value="computer">计算机系</option>
+              <option value="politics">政治系</option>
+            </select>
+            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">搜索账号</label>
+          <div class="relative">
+            <input type="text" placeholder="用户名/姓名/工号/学号" class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary pl-9">
+            <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-4 flex justify-end">
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 mr-3">
+          重置筛选
+        </button>
+        <button class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-all-300">
+          执行筛选
+        </button>
+      </div>
+    </div>
+    
+    <!-- 账号列表 -->
+    <div class="bg-white rounded-lg card-shadow mb-6">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                <input type="checkbox" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+              </th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">账号信息</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">角色</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">所属单位</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最后登录</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <input type="checkbox" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-10 w-10 rounded-full" src="https://picsum.photos/id/1005/40/40" alt="用户头像">
+                  <div class="ml-3">
+                    <div class="font-medium">系统管理员</div>
+                    <div class="text-sm text-gray-500">admin@school.edu</div>
+                    <div class="text-xs text-gray-400">工号: SYS001</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">超级管理员</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm">教务处</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">正常</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <div>2023-10-16 09:23</div>
+                <div class="text-xs text-gray-500">IP: 192.168.1.102</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline mr-3">编辑</a>
+                <a href="#" class="text-warning hover:text-warning/80 mr-3">重置密码</a>
+                <a href="#" class="text-danger hover:text-danger/80">冻结</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <input type="checkbox" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-10 w-10 rounded-full" src="https://picsum.photos/id/1012/40/40" alt="用户头像">
+                  <div class="ml-3">
+                    <div class="font-medium">王大明</div>
+                    <div class="text-sm text-gray-500">wangdm@school.edu</div>
+                    <div class="text-xs text-gray-400">工号: MATH023</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-secondary/10 text-secondary">院系管理员</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm">数学系</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">正常</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <div>2023-10-15 14:56</div>
+                <div class="text-xs text-gray-500">IP: 192.168.1.215</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline mr-3">编辑</a>
+                <a href="#" class="text-warning hover:text-warning/80 mr-3">重置密码</a>
+                <a href="#" class="text-danger hover:text-danger/80">冻结</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <input type="checkbox" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-10 w-10 rounded-full" src="https://picsum.photos/id/1027/40/40" alt="用户头像">
+                  <div class="ml-3">
+                    <div class="font-medium">李晓华</div>
+                    <div class="text-sm text-gray-500">lixh@school.edu</div>
+                    <div class="text-xs text-gray-400">工号: ENGL056</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-warning/10 text-warning">班主任</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm">英语系 23级英语2班</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">正常</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <div>2023-10-16 10:15</div>
+                <div class="text-xs text-gray-500">IP: 192.168.1.87</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline mr-3">编辑</a>
+                <a href="#" class="text-warning hover:text-warning/80 mr-3">重置密码</a>
+                <a href="#" class="text-danger hover:text-danger/80">冻结</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <input type="checkbox" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-10 w-10 rounded-full" src="https://picsum.photos/id/1025/40/40" alt="用户头像">
+                  <div class="ml-3">
+                    <div class="font-medium">张伟</div>
+                    <div class="text-sm text-gray-500">zhangw@school.edu</div>
+                    <div class="text-xs text-gray-400">工号: COMP112</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">任课教师</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm">计算机系</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-warning/10 text-warning">已冻结</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <div>2023-09-05 08:42</div>
+                <div class="text-xs text-gray-500">IP: 192.168.1.156</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline mr-3">编辑</a>
+                <a href="#" class="text-warning hover:text-warning/80 mr-3">重置密码</a>
+                <a href="#" class="text-success hover:text-success/80">解冻</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <input type="checkbox" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-10 w-10 rounded-full" src="https://picsum.photos/id/1062/40/40" alt="用户头像">
+                  <div class="ml-3">
+                    <div class="font-medium">刘芳</div>
+                    <div class="text-sm text-gray-500">liuf23@school.edu</div>
+                    <div class="text-xs text-gray-400">学号: 2023010456</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">学生</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm">物理系 23级物理1班</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">正常</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <div>2023-10-16 11:32</div>
+                <div class="text-xs text-gray-500">IP: 192.168.2.45</div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline mr-3">编辑</a>
+                <a href="#" class="text-warning hover:text-warning/80 mr-3">重置密码</a>
+                <a href="#" class="text-danger hover:text-danger/80">冻结</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 分页 -->
+      <div class="flex items-center justify-between p-6 border-t border-gray-200">
+        <div class="text-sm text-gray-500">
+          显示 1 至 5 条，共 5564 条记录
+        </div>
+        <div class="flex items-center space-x-2">
+          <div class="text-sm text-gray-500 mr-2">跳至</div>
+          <input type="text" value="1" class="w-12 h-8 border border-gray-200 rounded text-center text-sm">
+          <div class="text-sm text-gray-500 mx-2">页</div>
+          <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">确定</button>
+          
+          <div class="h-6 border-r border-gray-200 mx-2"></div>
+          
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 cursor-not-allowed">
+            <i class="fa fa-angle-left"></i>
+          </button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-primary bg-primary text-white">1</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-all-300">2</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-all-300">3</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-all-300">...</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-all-300">1113</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:text-primary transition-all-300">
+            <i class="fa fa-angle-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 批量操作 -->
+    <div class="bg-white rounded-lg p-5 card-shadow">
+      <h3 class="font-semibold text-lg mb-4">批量操作</h3>
+      <div class="flex flex-wrap gap-3">
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 flex items-center">
+          <i class="fa fa-check-circle mr-2"></i>批量启用选中账号
+        </button>
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 flex items-center">
+          <i class="fa fa-ban mr-2"></i>批量冻结选中账号
+        </button>
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 flex items-center">
+          <i class="fa fa-refresh mr-2"></i>批量重置密码
+        </button>
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 flex items-center">
+          <i class="fa fa-key mr-2"></i>批量修改角色
+        </button>
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 flex items-center">
+          <i class="fa fa-download mr-2"></i>导出选中账号
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-white border-t border-gray-200 py-6 mt-6">
+    <div class="container mx-auto px-4">
+      <div class="text-center text-sm text-gray-500">
+        <p>© 2023 学生考勤管理系统 版权所有</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 冻结账号确认模态框 (默认隐藏) -->
+  <div id="freezeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg w-full max-w-md p-6">
+      <h3 class="text-lg font-semibold mb-3">确认冻结账号</h3>
+      <p class="text-gray-600 mb-4">您确定要冻结"系统管理员"的账号吗？冻结后该账号将无法登录系统。</p>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-500 mb-1">冻结原因</label>
+        <select class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+          <option value="">请选择冻结原因</option>
+          <option value="graduate">毕业离校</option>
+          <option value="transfer">转学/转校</option>
+          <option value="dismiss">开除学籍</option>
+          <option value="leave">休学/请假</option>
+          <option value="other">其他原因</option>
+        </select>
+      </div>
+      <div class="flex justify-end space-x-3">
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300">取消</button>
+        <button class="px-4 py-2 bg-danger text-white rounded-md hover:bg-danger/90 transition-all-300">确认冻结</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 重置密码确认模态框 (默认隐藏) -->
+  <div id="resetPwdModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg w-full max-w-md p-6">
+      <h3 class="text-lg font-semibold mb-3">重置密码</h3>
+      <p class="text-gray-600 mb-4">重置"李晓华"的密码后，新密码将通过短信发送到用户手机，用户登录后需要强制修改密码。</p>
+      <div class="flex justify-end space-x-3">
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300">取消</button>
+        <button class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-all-300">确认重置</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 模态框交互
+    document.addEventListener('DOMContentLoaded', function() {
+      // 冻结按钮点击事件
+      const freezeButtons = document.querySelectorAll('a:text-danger');
+      const freezeModal = document.getElementById('freezeModal');
+      
+      freezeButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          freezeModal.classList.remove('hidden');
+        });
+      });
+      
+      // 重置密码按钮点击事件
+      const resetButtons = document.querySelectorAll('a:text-warning');
+      const resetPwdModal = document.getElementById('resetPwdModal');
+      
+      resetButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          resetPwdModal.classList.remove('hidden');
+        });
+      });
+      
+      // 关闭模态框
+      const closeButtons = document.querySelectorAll('#freezeModal button, #resetPwdModal button');
+      closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          freezeModal.classList.add('hidden');
+          resetPwdModal.classList.add('hidden');
+        });
+      });
+      
+      // 点击模态框外部关闭
+      window.addEventListener('click', function(e) {
+        if (e.target === freezeModal) {
+          freezeModal.classList.add('hidden');
+        }
+        if (e.target === resetPwdModal) {
+          resetPwdModal.classList.add('hidden');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+    

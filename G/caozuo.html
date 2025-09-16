@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学生考勤管理系统 - 操作日志</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  
+  <!-- 配置Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            warning: '#FF7D00',
+            danger: '#F53F3F',
+            success: '#00B42A',
+            gray: {
+              100: '#F2F3F5',
+              200: '#E5E6EB',
+              300: '#C9CDD4',
+              400: '#86909C',
+              500: '#4E5969',
+              600: '#272E3B',
+              700: '#1D2129',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .transition-all-300 {
+        transition: all 300ms ease-in-out;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-700 min-h-screen flex flex-col">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <!-- 左侧Logo和标题 -->
+        <div class="flex items-center space-x-3">
+          <div class="text-primary text-2xl">
+            <i class="fa fa-graduation-cap"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-semibold text-gray-700">学生考勤管理系统</h1>
+            <p class="text-xs text-gray-400">高效·精准·便捷</p>
+          </div>
+        </div>
+        
+        <!-- 右侧用户信息和操作 -->
+        <div class="flex items-center space-x-6">
+          <button class="text-gray-500 hover:text-primary transition-all-300 relative">
+            <i class="fa fa-bell-o"></i>
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-danger rounded-full text-white text-xs flex items-center justify-center">1</span>
+          </button>
+          <button class="text-gray-500 hover:text-primary transition-all-300">
+            <i class="fa fa-cog"></i>
+          </button>
+          <div class="flex items-center space-x-2">
+            <img src="https://picsum.photos/id/1005/40/40" alt="超级管理员头像" class="w-8 h-8 rounded-full object-cover">
+            <div>
+              <p class="text-sm font-medium">系统管理员</p>
+              <p class="text-xs text-gray-400">超级管理员</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体内容 -->
+  <main class="flex-1 container mx-auto px-4 py-6">
+    <!-- 面包屑导航 -->
+    <div class="text-sm mb-6">
+      <a href="#" class="text-gray-500 hover:text-primary">首页</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <a href="#" class="text-gray-500 hover:text-primary">系统管理</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <a href="#" class="text-gray-500 hover:text-primary">权限管理</a>
+      <span class="mx-2 text-gray-400">/</span>
+      <span class="text-primary">操作日志</span>
+    </div>
+    
+    <!-- 页面标题 -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div>
+        <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-700">操作日志</h2>
+        <p class="text-gray-400 mt-1">记录系统所有用户的关键操作，支持查询和追溯</p>
+      </div>
+      <div class="mt-4 md:mt-0 flex space-x-3">
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 flex items-center">
+          <i class="fa fa-download mr-2"></i>导出日志
+        </button>
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 flex items-center">
+          <i class="fa fa-refresh mr-2"></i>刷新
+        </button>
+      </div>
+    </div>
+    
+    <!-- 操作统计 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div class="bg-white rounded-lg p-5 card-shadow lg:col-span-1">
+        <h3 class="font-semibold text-lg mb-4">操作类型分布</h3>
+        <div class="h-64">
+          <canvas id="operationTypeChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-5 card-shadow lg:col-span-2">
+        <h3 class="font-semibold text-lg mb-4">近7天操作趋势</h3>
+        <div class="h-64">
+          <canvas id="operationTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 筛选和搜索 -->
+    <div class="bg-white rounded-lg p-5 card-shadow mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">操作人</label>
+          <div class="relative">
+            <input type="text" placeholder="用户名/姓名" class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">操作类型</label>
+          <div class="relative">
+            <select class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none">
+              <option value="all" selected>全部类型</option>
+              <option value="login">登录/退出</option>
+              <option value="user">用户管理</option>
+              <option value="role">角色权限</option>
+              <option value="attendance">考勤管理</option>
+              <option value="leave">请假审批</option>
+              <option value="system">系统设置</option>
+            </select>
+            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">操作结果</label>
+          <div class="relative">
+            <select class="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary appearance-none">
+              <option value="all" selected>全部结果</option>
+              <option value="success">成功</option>
+              <option value="fail">失败</option>
+            </select>
+            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <i class="fa fa-chevron-down text-gray-400 text-xs"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-500 mb-1">时间范围</label>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="date" value="2023-10-10" class="px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+            <input type="date" value="2023-10-16" class="px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-4 flex justify-end">
+        <button class="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-all-300 mr-3">
+          重置筛选
+        </button>
+        <button class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-all-300">
+          搜索日志
+        </button>
+      </div>
+    </div>
+    
+    <!-- 日志列表 -->
+    <div class="bg-white rounded-lg card-shadow mb-6">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作时间</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作人</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作类型</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作内容</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP地址</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作结果</th>
+              <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                2023-10-16 14:35:22
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-8 w-8 rounded-full" src="https://picsum.photos/id/1027/32/32" alt="用户头像">
+                  <div class="ml-2">
+                    <div class="text-sm font-medium">李晓华</div>
+                    <div class="text-xs text-gray-500">班主任</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-warning/10 text-warning">请假审批</span>
+              </td>
+              <td class="px-4 py-4 text-sm max-w-md">
+                审批通过了学生"刘芳"(学号:2023010456)的病假申请，请假时间:2023-10-17至2023-10-19，共3天
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                192.168.1.87
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">成功</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline">详情</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                2023-10-16 11:32:05
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-8 w-8 rounded-full" src="https://picsum.photos/id/1062/32/32" alt="用户头像">
+                  <div class="ml-2">
+                    <div class="text-sm font-medium">刘芳</div>
+                    <div class="text-xs text-gray-500">学生</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">登录</span>
+              </td>
+              <td class="px-4 py-4 text-sm max-w-md">
+                用户登录系统
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                192.168.2.45
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">成功</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline">详情</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                2023-10-16 09:23:18
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-8 w-8 rounded-full" src="https://picsum.photos/id/1005/32/32" alt="用户头像">
+                  <div class="ml-2">
+                    <div class="text-sm font-medium">系统管理员</div>
+                    <div class="text-xs text-gray-500">超级管理员</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">角色权限</span>
+              </td>
+              <td class="px-4 py-4 text-sm max-w-md">
+                修改了"班主任"角色的权限，新增"导出本班考勤报表"权限，移除"修改考勤规则"权限
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                192.168.1.102
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">成功</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline">详情</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                2023-10-15 16:42:51
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-8 w-8 rounded-full" src="https://picsum.photos/id/1025/32/32" alt="用户头像">
+                  <div class="ml-2">
+                    <div class="text-sm font-medium">张伟</div>
+                    <div class="text-xs text-gray-500">任课教师</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">考勤管理</span>
+              </td>
+              <td class="px-4 py-4 text-sm max-w-md">
+                记录了2023-10-15 14:00-16:00"计算机基础"课程的考勤，共45名学生，其中迟到3人，旷课2人
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                192.168.1.156
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">成功</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline">详情</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                2023-10-15 10:18:33
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-8 w-8 rounded-full" src="https://picsum.photos/id/1012/32/32" alt="用户头像">
+                  <div class="ml-2">
+                    <div class="text-sm font-medium">王大明</div>
+                    <div class="text-xs text-gray-500">院系管理员</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-secondary/10 text-secondary">用户管理</span>
+              </td>
+              <td class="px-4 py-4 text-sm max-w-md">
+                冻结了用户"张伟"(工号:COMP112)的账号，冻结原因:长期未到岗
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                192.168.1.215
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-success/10 text-success">成功</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline">详情</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                2023-10-14 08:52:17
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <img class="h-8 w-8 rounded-full" src="https://picsum.photos/id/1074/32/32" alt="用户头像">
+                  <div class="ml-2">
+                    <div class="text-sm font-medium">陈明</div>
+                    <div class="text-xs text-gray-500">学生</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-danger/10 text-danger">登录</span>
+              </td>
+              <td class="px-4 py-4 text-sm max-w-md">
+                用户尝试登录系统，密码错误
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                192.168.2.78
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs rounded-full bg-danger/10 text-danger">失败</span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <a href="#" class="text-primary hover:underline">详情</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 分页 -->
+      <div class="flex items-center justify-between p-6 border-t border-gray-200">
+        <div class="text-sm text-gray-500">
+          显示 1 至 6 条，共 1256 条记录
+        </div>
+        <div class="flex items-center space-x-2">
+          <div class="text-sm text-gray-500 mr-2">跳至</div>
+          <input type="text" value="1" class="w-12 h-8 border border-gray-200 rounded text-center text-sm">
+          <div class="text-sm text-gray-500 mx-2">页</div>
+          <button class="px-3 py-1 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50">确定</button>
+          
+          <div class="h-6 border-r border-gray-200 mx-2"></div>
+          
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 cursor-not-allowed">
+            <i class="fa fa-angle-left"></i>
+          </button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-primary bg-primary text-white">1</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-all-300">2</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-all-300">3</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-all-300">...</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-all-300">210</button>
+          <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:text-primary transition-all-300">
+            <i class="fa fa-angle-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-white border-t border-gray-200 py-6 mt-6">
+    <div class="container mx-auto px-4">
+      <div class="text-center text-sm text-gray-500">
+        <p>© 2023 学生考勤管理系统 版权所有</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 初始化图表
+    document.addEventListener('DOMContentLoaded', function() {
+      // 操作类型分布图表
+      const typeCtx = document.getElementById('operationTypeChart').getContext('2d');
+      const typeChart = new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['考勤管理', '请假审批', '用户管理', '角色权限', '登录/退出', '系统设置'],
+          datasets: [{
+            data: [350, 280, 120, 85, 320, 101],
+            backgroundColor: [
+              'rgba(22, 93, 255, 0.7)',
+              'rgba(255, 125, 0, 0.7)',
+              'rgba(54, 207, 201, 0.7)',
+              'rgba(153, 102, 255, 0.7)',
+              'rgba(0, 180, 42, 0.7)',
+              'rgba(86, 90, 100, 0.7)'
+            ],
+            borderColor: [
+              'rgba(22, 93, 255, 1)',
+              'rgba(255, 125, 0, 1)',
+              'rgba(54, 207, 201, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(0, 180, 42, 1)',
+              'rgba(86, 90, 100, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                padding: 15
+              }
+            }
+          },
+          cutout: '60%'
+        }
+      });
+      
+      // 操作趋势图表
+      const trendCtx = document.getElementById('operationTrendChart').getContext('2d');
+      const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+          labels: ['10/10', '10/11', '10/12', '10/13', '10/14', '10/15', '10/16'],
+          datasets: [
+            {
+              label: '管理员操作',
+              data: [45, 52, 38, 49, 63, 58, 42],
+              borderColor: 'rgba(22, 93, 255, 1)',
+              backgroundColor: 'rgba(22, 93, 255, 0.1)',
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: '教师操作',
+              data: [120, 135, 110, 142, 156, 168, 132],
+              borderColor: 'rgba(255, 125, 0, 1)',
+              backgroundColor: 'rgba(255, 125, 0, 0.1)',
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: '学生操作',
+              data: [210, 235, 198, 256, 278, 245, 205],
+              borderColor: 'rgba(0, 180, 42, 1)',
+              backgroundColor: 'rgba(0, 180, 42, 0.1)',
+              tension: 0.3,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                drawBorder: false
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              align: 'end'
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+    
