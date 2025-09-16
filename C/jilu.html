@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>考勤详情与异常处理 - 智慧课堂系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            success: '#52C41A',
+            warning: '#FAAD14',
+            danger: '#FF4D4F',
+            neutral: {
+              100: '#F5F7FA',
+              200: '#E4E6EB',
+              300: '#C9CDD4',
+              400: '#86909C',
+              500: '#4E5969',
+              600: '#272E3B',
+              700: '#1D2129',
+            }
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .scrollbar-hide {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+    }
+  </style>
+</head>
+
+<body class="font-inter bg-neutral-100 text-neutral-700 min-h-screen flex flex-col">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <button id="sidebar-toggle" class="lg:hidden text-neutral-600 hover:text-primary transition-colors">
+          <i class="fa fa-bars text-xl"></i>
+        </button>
+        <div class="flex items-center">
+          <i class="fa fa-graduation-cap text-primary text-2xl mr-2"></i>
+          <h1 class="text-xl font-semibold text-neutral-700">智慧课堂系统</h1>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-6">
+        <div class="relative hidden md:block">
+          <input type="text" placeholder="搜索..." class="pl-10 pr-4 py-2 rounded-full bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary/30 w-48 lg:w-64 transition-all">
+          <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
+        </div>
+        
+        <div class="relative">
+          <button class="text-neutral-600 hover:text-primary transition-colors relative">
+            <i class="fa fa-bell text-xl"></i>
+            <span class="absolute -top-1 -right-1 bg-danger text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
+          </button>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+          <img src="https://picsum.photos/id/1005/40/40" alt="教师头像" class="w-8 h-8 rounded-full object-cover border-2 border-primary/20">
+          <span class="hidden md:inline font-medium">张教授</span>
+          <i class="fa fa-angle-down text-neutral-400"></i>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <!-- 侧边栏 -->
+    <aside id="sidebar" class="w-64 bg-white shadow-sm h-[calc(100vh-64px)] sticky top-[64px] transition-all duration-300 transform lg:translate-x-0 -translate-x-full absolute z-40">
+      <nav class="py-4 h-full flex flex-col">
+        <div class="px-4 pb-4 border-b border-neutral-200">
+          <p class="text-neutral-400 text-sm">主导航</p>
+        </div>
+        
+        <ul class="flex-1 overflow-y-auto scrollbar-hide py-2">
+          <li class="mb-1">
+            <a href="#" class="flex items-center px-4 py-3 text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+              <i class="fa fa-tachometer w-5 text-center mr-3"></i>
+              <span>仪表盘</span>
+            </a>
+          </li>
+          <li class="mb-1">
+            <a href="#" class="flex items-center px-4 py-3 bg-primary/10 text-primary border-l-4 border-primary transition-colors">
+              <i class="fa fa-calendar-check-o w-5 text-center mr-3"></i>
+              <span>考勤管理</span>
+            </a>
+          </li>
+          <li class="mb-1">
+            <a href="#" class="flex items-center px-4 py-3 text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+              <i class="fa fa-book w-5 text-center mr-3"></i>
+              <span>课程管理</span>
+            </a>
+          </li>
+          <li class="mb-1">
+            <a href="#" class="flex items-center px-4 py-3 text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+              <i class="fa fa-users w-5 text-center mr-3"></i>
+              <span>学生管理</span>
+            </a>
+          </li>
+          <li class="mb-1">
+            <a href="#" class="flex items-center px-4 py-3 text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+              <i class="fa fa-file-text-o w-5 text-center mr-3"></i>
+              <span>成绩管理</span>
+            </a>
+          </li>
+          <li class="mb-1">
+            <a href="#" class="flex items-center px-4 py-3 text-neutral-500 hover:bg-primary/5 hover:text-primary transition-colors">
+              <i class="fa fa-comments-o w-5 text-center mr-3"></i>
+              <span>消息通知</span>
+            </a>
+          </li>
+        </ul>
+        
+        <div class="p-4 border-t border-neutral-200">
+          <a href="#" class="flex items-center text-neutral-500 hover:text-primary transition-colors">
+            <i class="fa fa-cog w-5 text-center mr-3"></i>
+            <span>系统设置</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-6 bg-neutral-100">
+      <!-- 面包屑导航 -->
+      <div class="flex items-center text-sm text-neutral-500 mb-6">
+        <a href="#" class="hover:text-primary">首页</a>
+        <i class="fa fa-angle-right mx-2 text-neutral-400 text-xs"></i>
+        <a href="#" class="hover:text-primary">考勤管理</a>
+        <i class="fa fa-angle-right mx-2 text-neutral-400 text-xs"></i>
+        <span class="text-neutral-700">考勤详情与异常处理</span>
+      </div>
+      
+      <!-- 课程信息卡片 -->
+      <div class="bg-white rounded-xl p-5 mb-6 card-shadow">
+        <div class="flex flex-col md:flex-row md:items-center justify-between">
+          <div>
+            <h2 class="text-xl font-semibold text-neutral-700 mb-2">数据结构与算法 - 第12周</h2>
+            <div class="flex flex-wrap gap-y-2 gap-x-6 text-sm">
+              <div class="flex items-center text-neutral-500">
+                <i class="fa fa-calendar mr-2 text-primary"></i>
+                <span>2023年10月26日</span>
+              </div>
+              <div class="flex items-center text-neutral-500">
+                <i class="fa fa-clock-o mr-2 text-primary"></i>
+                <span>14:00 - 16:00</span>
+              </div>
+              <div class="flex items-center text-neutral-500">
+                <i class="fa fa-map-marker mr-2 text-primary"></i>
+                <span>计算机楼B302</span>
+              </div>
+              <div class="flex items-center text-neutral-500">
+                <i class="fa fa-users mr-2 text-primary"></i>
+                <span>应到: 45人 实到: 41人</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 md:mt-0 flex space-x-3">
+            <button class="px-4 py-2 bg-white border border-neutral-300 rounded-lg text-neutral-600 hover:bg-neutral-50 transition-colors flex items-center">
+              <i class="fa fa-download mr-2"></i>
+              <span>导出记录</span>
+            </button>
+            <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center">
+              <i class="fa fa-refresh mr-2"></i>
+              <span>刷新数据</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 考勤统计概览 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        <div class="bg-white rounded-xl p-5 card-shadow">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-neutral-500 text-sm mb-1">出勤率</p>
+              <h3 class="text-2xl font-semibold text-neutral-700">91.1%</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success">
+              <i class="fa fa-check"></i>
+            </div>
+          </div>
+          <div class="mt-3 h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
+            <div class="h-full bg-success rounded-full" style="width: 91.1%"></div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl p-5 card-shadow">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-neutral-500 text-sm mb-1">迟到</p>
+              <h3 class="text-2xl font-semibold text-neutral-700">3人</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+              <i class="fa fa-clock-o"></i>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-neutral-500">
+            <span>较上次 +1人</span>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl p-5 card-shadow">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-neutral-500 text-sm mb-1">缺勤</p>
+              <h3 class="text-2xl font-semibold text-neutral-700">4人</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+              <i class="fa fa-times"></i>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-neutral-500">
+            <span>较上次 持平</span>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl p-5 card-shadow">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-neutral-500 text-sm mb-1">待处理补签</p>
+              <h3 class="text-2xl font-semibold text-neutral-700">2人</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <i class="fa fa-clipboard"></i>
+            </div>
+          </div>
+          <div class="mt-3 text-sm text-primary">
+            <a href="#sign-repair" class="hover:underline flex items-center">
+              <span>查看详情</span>
+              <i class="fa fa-angle-right ml-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 考勤状态分布图表 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="lg:col-span-1 bg-white rounded-xl p-5 card-shadow">
+          <h3 class="text-lg font-medium text-neutral-700 mb-4">考勤状态分布</h3>
+          <div class="h-64">
+            <canvas id="attendanceChart"></canvas>
+          </div>
+        </div>
+        
+        <div class="lg:col-span-2 bg-white rounded-xl p-5 card-shadow">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-neutral-700">签到时间分布</h3>
+            <div class="text-sm text-neutral-500">
+              <span>课程开始前30分钟至结束</span>
+            </div>
+          </div>
+          <div class="h-64">
+            <canvas id="timeDistributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 学生考勤列表 -->
+      <div class="bg-white rounded-xl p-5 mb-6 card-shadow">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-5">
+          <h3 class="text-lg font-medium text-neutral-700 mb-3 md:mb-0">学生考勤详情</h3>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <div class="relative">
+              <select class="pl-3 pr-8 py-2 border border-neutral-300 rounded-lg text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none w-full sm:w-auto">
+                <option>全部状态</option>
+                <option>已签到</option>
+                <option>迟到</option>
+                <option>缺勤</option>
+                <option>早退</option>
+              </select>
+              <i class="fa fa-angle-down absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 pointer-events-none"></i>
+            </div>
+            <div class="relative">
+              <input type="text" placeholder="搜索学生姓名/学号" class="pl-10 pr-4 py-2 border border-neutral-300 rounded-lg text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary/30 w-full sm:w-64">
+              <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="overflow
