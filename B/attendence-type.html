@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>自定义考勤类型 - 考勤管理系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            success: '#52C41A',
+            warning: '#FAAD14',
+            danger: '#FF4D4F',
+            info: '#40A9FF',
+            light: '#F5F7FA',
+            dark: '#1D2129',
+            'gray-100': '#F2F3F5',
+            'gray-200': '#E5E6EB',
+            'gray-300': '#C9CDD4',
+            'gray-400': '#86909C',
+            'gray-500': '#4E5969',
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            card: '0 2px 14px 0 rgba(0, 0, 0, 0.06)',
+            hover: '0 6px 20px 0 rgba(0, 0, 0, 0.1)',
+          }
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .transition-height {
+        transition: max-height 0.3s ease-in-out;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .text-balance {
+        text-wrap: balance;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-inter bg-light text-dark min-h-screen flex flex-col">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- 左侧Logo和标题 -->
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center">
+            <i class="fa fa-calendar-check-o text-primary text-2xl mr-2"></i>
+            <span class="text-lg font-semibold">考勤管理系统</span>
+          </div>
+          <div class="hidden md:block h-6 w-px bg-gray-200"></div>
+          <nav class="hidden md:flex space-x-8 ml-8">
+            <a href="#" class="text-gray-400 hover:text-primary text-sm font-medium transition-colors">首页</a>
+            <a href="#" class="text-primary border-b-2 border-primary pb-5 text-sm font-medium">考勤规则</a>
+            <a href="#" class="text-gray-400 hover:text-primary text-sm font-medium transition-colors">考勤记录</a>
+            <a href="#" class="text-gray-400 hover:text-primary text-sm font-medium transition-colors">统计分析</a>
+            <a href="#" class="text-gray-400 hover:text-primary text-sm font-medium transition-colors">系统设置</a>
+          </nav>
+        </div>
+        
+        <!-- 右侧用户信息 -->
+        <div class="flex items-center space-x-4">
+          <button class="p-2 rounded-full hover:bg-gray-100 transition-colors relative">
+            <i class="fa fa-bell-o text-gray-500"></i>
+            <span class="absolute top-1 right-1 h-2 w-2 bg-danger rounded-full"></span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <img src="https://picsum.photos/id/1005/200/200" alt="管理员头像" class="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm">
+            <span class="hidden md:inline text-sm font-medium">张老师</span>
+            <i class="fa fa-angle-down text-gray-400 text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- 页面标题和路径 -->
+    <div class="mb-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-dark">自定义考勤类型</h1>
+          <p class="text-gray-400 mt-1 text-sm">管理各类考勤类型及其判定标准</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+          <nav class="flex items-center text-sm text-gray-400">
+            <a href="#" class="hover:text-primary">首页</a>
+            <i class="fa fa-angle-right mx-2 text-xs"></i>
+            <a href="#" class="hover:text-primary">考勤规则</a>
+            <i class="fa fa-angle-right mx-2 text-xs"></i>
+            <span class="text-gray-500">自定义考勤类型</span>
+          </nav>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 功能选项卡 -->
+    <div class="bg-white rounded-lg shadow-card mb-6 overflow-hidden">
+      <div class="flex border-b border-gray-100">
+        <button class="px-6 py-4 text-primary border-b-2 border-primary font-medium text-sm">考勤类型管理</button>
+        <button class="px-6 py-4 text-gray-400 hover:text-gray-500 font-medium text-sm transition-colors">考勤时段配置</button>
+        <button class="px-6 py-4 text-gray-400 hover:text-gray-500 font-medium text-sm transition-colors">请假规则设定</button>
+        <button class="px-6 py-4 text-gray-400 hover:text-gray-500 font-medium text-sm transition-colors">异常阈值设置</button>
+      </div>
+    </div>
+    
+    <!-- 主要内容卡片 -->
+    <div class="bg-white rounded-lg shadow-card mb-6 overflow-hidden">
+      <div class="p-6">
+        <!-- 操作栏 -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <h2 class="text-lg font-semibold mb-3 sm:mb-0">考勤类型列表</h2>
+          <button id="addTypeBtn" class="flex items-center justify-center bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
+            <i class="fa fa-plus mr-2"></i>
+            添加新类型
+          </button>
+        </div>
+        
+        <!-- 考勤类型列表 -->
+        <div class="space-y-4">
+          <!-- 迟到 -->
+          <div class="border border-gray-100 rounded-lg overflow-hidden hover:shadow-hover transition-shadow">
+            <div class="p-4 flex justify-between items-center bg-gray-50">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center mr-3">
+                  <i class="fa fa-clock-o text-warning"></i>
+                </div>
+                <h3 class="font-medium">迟到</h3>
+              </div>
+              <div class="flex space-x-2">
+                <button class="edit-btn p-2 text-gray-400 hover:text-primary transition-colors" data-type="late">
+                  <i class="fa fa-pencil"></i>
+                </button>
+                <button class="delete-btn p-2 text-gray-400 hover:text-danger transition-colors" data-type="late">
+                  <i class="fa fa-trash-o"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 border-t border-gray-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">判定标准</p>
+                  <p class="text-sm">上课时间后签到，且未超过10分钟</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">关联规则</p>
+                  <p class="text-sm">迟到≥10分钟自动记为旷课</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 早退 -->
+          <div class="border border-gray-100 rounded-lg overflow-hidden hover:shadow-hover transition-shadow">
+            <div class="p-4 flex justify-between items-center bg-gray-50">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center mr-3">
+                  <i class="fa fa-sign-out text-warning"></i>
+                </div>
+                <h3 class="font-medium">早退</h3>
+              </div>
+              <div class="flex space-x-2">
+                <button class="edit-btn p-2 text-gray-400 hover:text-primary transition-colors" data-type="early">
+                  <i class="fa fa-pencil"></i>
+                </button>
+                <button class="delete-btn p-2 text-gray-400 hover:text-danger transition-colors" data-type="early">
+                  <i class="fa fa-trash-o"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 border-t border-gray-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">判定标准</p>
+                  <p class="text-sm">下课时间前离开，且提前时间超过5分钟</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">关联规则</p>
+                  <p class="text-sm">提前30分钟以上离开视为旷课</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 旷课 -->
+          <div class="border border-gray-100 rounded-lg overflow-hidden hover:shadow-hover transition-shadow">
+            <div class="p-4 flex justify-between items-center bg-gray-50">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-danger/10 flex items-center justify-center mr-3">
+                  <i class="fa fa-times text-danger"></i>
+                </div>
+                <h3 class="font-medium">旷课</h3>
+              </div>
+              <div class="flex space-x-2">
+                <button class="edit-btn p-2 text-gray-400 hover:text-primary transition-colors" data-type="absent">
+                  <i class="fa fa-pencil"></i>
+                </button>
+                <button class="delete-btn p-2 text-gray-400 hover:text-danger transition-colors" data-type="absent">
+                  <i class="fa fa-trash-o"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 border-t border-gray-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">判定标准</p>
+                  <p class="text-sm">未签到且无有效请假记录，或迟到超过10分钟</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">关联规则</p>
+                  <p class="text-sm">旷课1次扣除相应学分，累计达到阈值触发预警</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 事假 -->
+          <div class="border border-gray-100 rounded-lg overflow-hidden hover:shadow-hover transition-shadow">
+            <div class="p-4 flex justify-between items-center bg-gray-50">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-info/10 flex items-center justify-center mr-3">
+                  <i class="fa fa-user-o text-info"></i>
+                </div>
+                <h3 class="font-medium">事假</h3>
+              </div>
+              <div class="flex space-x-2">
+                <button class="edit-btn p-2 text-gray-400 hover:text-primary transition-colors" data-type="personal">
+                  <i class="fa fa-pencil"></i>
+                </button>
+                <button class="delete-btn p-2 text-gray-400 hover:text-danger transition-colors" data-type="personal">
+                  <i class="fa fa-trash-o"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 border-t border-gray-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">判定标准</p>
+                  <p class="text-sm">学生因个人事务请假并获得批准</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">关联规则</p>
+                  <p class="text-sm">每学期事假不得超过5天，需按流程审批</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 病假 -->
+          <div class="border border-gray-100 rounded-lg overflow-hidden hover:shadow-hover transition-shadow">
+            <div class="p-4 flex justify-between items-center bg-gray-50">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center mr-3">
+                  <i class="fa fa-medkit text-success"></i>
+                </div>
+                <h3 class="font-medium">病假</h3>
+              </div>
+              <div class="flex space-x-2">
+                <button class="edit-btn p-2 text-gray-400 hover:text-primary transition-colors" data-type="sick">
+                  <i class="fa fa-pencil"></i>
+                </button>
+                <button class="delete-btn p-2 text-gray-400 hover:text-danger transition-colors" data-type="sick">
+                  <i class="fa fa-trash-o"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 border-t border-gray-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">判定标准</p>
+                  <p class="text-sm">学生因病请假并提供医疗证明</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">关联规则</p>
+                  <p class="text-sm">需上传医疗证明，连续病假超过3天需系主任审批</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 公假 -->
+          <div class="border border-gray-100 rounded-lg overflow-hidden hover:shadow-hover transition-shadow">
+            <div class="p-4 flex justify-between items-center bg-gray-50">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+                  <i class="fa fa-building-o text-primary"></i>
+                </div>
+                <h3 class="font-medium">公假</h3>
+              </div>
+              <div class="flex space-x-2">
+                <button class="edit-btn p-2 text-gray-400 hover:text-primary transition-colors" data-type="official">
+                  <i class="fa fa-pencil"></i>
+                </button>
+                <button class="delete-btn p-2 text-gray-400 hover:text-danger transition-colors" data-type="official">
+                  <i class="fa fa-trash-o"></i>
+                </button>
+              </div>
+            </div>
+            <div class="p-4 border-t border-gray-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">判定标准</p>
+                  <p class="text-sm">因学校或院系安排的公务活动无法上课</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-400 mb-1">关联规则</p>
+                  <p class="text-sm">需提供相关部门出具的公假证明，不计入缺勤</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- 添加/编辑考勤类型的模态框 -->
+  <div id="typeModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-semibold" id="modalTitle">添加新考勤类型</h3>
+          <button id="closeModal" class="text-gray-400 hover:text-gray-500">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        <form id="typeForm">
+          <div class="mb-4">
+            <label for="typeName" class="block text-sm font-medium text-gray-500 mb-1">考勤类型名称</label>
+            <input type="text" id="typeName" name="typeName" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-colors" placeholder="例如：迟到、早退等">
+          </div>
+          
+          <div class="mb-4">
+            <label for="typeIcon" class="block text-sm font-medium text-gray-500 mb-1">选择图标</label>
+            <div class="grid grid-cols-6 gap-2 p-2 border border-gray-200 rounded-lg">
+              <button type="button" class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:text-primary transition-colors" data-icon="clock-o">
+                <i class="fa fa-clock-o"></i>
+              </button>
+              <button type="button" class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:text-primary transition-colors" data-icon="sign-out">
+                <i class="fa fa-sign-out"></i>
+              </button>
+              <button type="button" class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:text-primary transition-colors" data-icon="times">
+                <i class="fa fa-times"></i>
+              </button>
+              <button type="button" class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:text-primary transition-colors" data-icon="user-o">
+                <i class="fa fa-user-o"></i>
+              </button>
+              <button type="button" class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:text-primary transition-colors" data-icon="medkit">
+                <i class="fa fa-medkit"></i>
+              </button>
+              <button type="button" class="icon-option w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:text-primary transition-colors" data-icon="building-o">
+                <i class="fa fa-building-o"></i>
+              </button>
+            </div>
+            <input type="hidden" id="selectedIcon" name="selectedIcon" value="clock-o">
+          </div>
+          
+          <div class="mb-4">
+            <label for="typeColor" class="block text-sm font-medium text-gray-500 mb-1">选择颜色</label>
+            <div class="flex space-x-2">
+              <button type="button" class="color-option w-8 h-8 rounded-full bg-primary border-2 border-transparent hover:scale-110 transition-transform" data-color="primary"></button>
+              <button type="button" class="color-option w-8 h-8 rounded-full bg-success border-2 border-transparent hover:scale-110 transition-transform" data-color="success"></button>
+              <button type="button" class="color-option w-8 h-8 rounded-full bg-warning border-2 border-transparent hover:scale-110 transition-transform" data-color="warning"></button>
+              <button type="button" class="color-option w-8 h-8 rounded-full bg-danger border-2 border-transparent hover:scale-110 transition-transform" data-color="danger"></button>
+              <button type="button" class="color-option w-8 h-8 rounded-full bg-info border-2 border-transparent hover:scale-110 transition-transform" data-color="info"></button>
+              <button type="button" class="color-option w-8 h-8 rounded-full bg-secondary border-2 border-transparent hover:scale-110 transition-transform" data-color="secondary"></button>
+            </div>
+            <input type="hidden" id="selectedColor" name="selectedColor" value="primary">
+          </div>
+          
+          <div class="mb-4">
+            <label for="judgeCriteria" class="block text-sm font-medium text-gray-500 mb-1">判定标准</label>
+            <textarea id="judgeCriteria" name="judgeCriteria" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-colors" placeholder="描述该考勤类型的判定条件"></textarea>
+          </div>
+          
+          <div class="mb-6">
+            <label for="relatedRules" class="block text-sm font-medium text-gray-500 mb-1">关联规则</label>
+            <textarea id="relatedRules" name="relatedRules" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-colors" placeholder="描述与该类型相关的其他规则，如转换条件等"></textarea>
+          </div>
+          
+          <div class="flex space-x-3">
+            <button type="button" id="cancelBtn" class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors text-sm font-medium">取消</button>
+            <button type="submit" class="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors text-sm font-medium">保存</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 删除确认模态框 -->
+  <div id="deleteModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md transform transition-all duration-300 scale-95 opacity-0" id="deleteModalContent">
+      <div class="p-6 text-center">
+        <div class="w-16 h-16 bg-danger/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fa fa-exclamation-triangle text-danger text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold mb-2">确认删除</h3>
+        <p class="text-gray-400 text-sm mb-6">您确定要删除该考勤类型吗？此操作不可撤销，相关记录可能会受到影响。</p>
+        
+        <div class="flex space-x-3">
+          <button id="cancelDeleteBtn" class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors text-sm font-medium">取消</button>
+          <button id="confirmDeleteBtn" class="flex-1 px-4 py-2 bg-danger hover:bg-danger/90 text-white rounded-lg transition-colors text-sm font-medium">删除</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 成功提示 -->
+  <div id="successToast" class="fixed bottom-6 right-6 bg-success text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center">
+    <i class="fa fa-check-circle mr-2"></i>
+    <span id="successMessage">操作成功</span>
+  </div>
+  
+  <!-- 页脚 -->
+  <footer class="bg-white border-t border-gray-100 py-6">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <p class="text-gray-400 text-sm mb-4 md:mb-0">© 2023 考勤管理系统 版权所有</p>
+        <div class="flex space-x-6">
+          <a href="#" class="text-gray-400 hover:text-primary text-sm transition-colors">使用帮助</a>
+          <a href="#" class="text-gray-400 hover:text-primary text-sm transition-colors">隐私政策</a>
+          <a href="#" class="text-gray-400 hover:text-primary text-sm transition-colors">联系我们</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // DOM 元素
+    const addTypeBtn = document.getElementById('addTypeBtn');
+    const typeModal = document.getElementById('typeModal');
+    const modalContent = document.getElementById('modalContent');
+    const closeModal = document.getElementById('closeModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const typeForm = document.getElementById('typeForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const iconOptions = document.querySelectorAll('.icon-option');
+    const colorOptions = document.querySelectorAll('.color-option');
+    const selectedIcon = document.getElementById('selectedIcon');
+    const selectedColor = document.getElementById('selectedColor');
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteModalContent = document.getElementById('deleteModalContent');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const successToast = document.getElementById('successToast');
+    const successMessage = document.getElementById('successMessage');
+    const editButtons = document.querySelectorAll('.edit-btn');
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    
+    // 当前操作的考勤类型ID
+    let currentTypeId = null;
+    
+    // 打开模态框
+    function openModal(isEdit = false, typeId = null) {
+      currentTypeId = isEdit ? typeId : null;
+      modalTitle.textContent = isEdit ? '编辑考勤类型' : '添加新考勤类型';
+      
+      // 如果是编辑模式，填充表单数据
+      if (isEdit && typeId) {
+        // 这里只是模拟数据，实际应用中应从服务器获取
+        const typeData = getTypeDataById(typeId);
+        if (typeData) {
+          document.getElementById('typeName').value = typeData.name;
+          document.getElementById('judgeCriteria').value = typeData.criteria;
+          document.getElementById('relatedRules').value = typeData.rules;
+          selectedIcon.value = typeData.icon;
+          selectedColor.value = typeData.color;
+          
+          // 更新选中的图标和颜色
+          updateSelectedOptions();
+        }
+      } else {
+        // 重置表单
+        typeForm.reset();
+        selectedIcon.value = 'clock-o';
+        selectedColor.value = 'primary';
+        updateSelectedOptions();
+      }
+      
+      // 显示模态框并添加动画
+      typeModal.classList.remove('hidden');
+      setTimeout(() => {
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+    
+    // 关闭模态框
+    function closeTypeModal() {
+      modalContent.classList.remove('scale-100', 'opacity-100');
+      modalContent.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        typeModal.classList.add('hidden');
+      }, 300);
+    }
+    
+    // 打开删除确认模态框
+    function openDeleteModal(typeId) {
+      currentTypeId = typeId;
+      deleteModal.classList.remove('hidden');
+      setTimeout(() => {
+        deleteModalContent.classList.remove('scale-95', 'opacity-0');
+        deleteModalContent.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+    
+    // 关闭删除确认模态框
+    function closeDeleteModal() {
+      deleteModalContent.classList.remove('scale-100', 'opacity-100');
+      deleteModalContent.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        deleteModal.classList.add('hidden');
+      }, 300);
+    }
+    
+    // 显示成功提示
+    function showSuccessToast(message) {
+      successMessage.textContent = message;
+      successToast.classList.remove('translate-y-20', 'opacity-0');
+      successToast.classList.add('translate-y-0', 'opacity-100');
+      
+      setTimeout(() => {
+        successToast.classList.remove('translate-y-0', 'opacity-100');
+        successToast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+    
+    // 更新选中的图标和颜色选项
+    function updateSelectedOptions() {
+      // 更新图标选择
+      iconOptions.forEach(option => {
+        if (option.dataset.icon === selectedIcon.value) {
+          option.classList.add('bg-primary/10', 'text-primary');
+          option.classList.remove('bg-gray-100', 'text-gray-500');
+        } else {
+          option.classList.add('bg-gray-100', 'text-gray-500');
+          option.classList.remove('bg-primary/10', 'text-primary');
+        }
+      });
+      
+      // 更新颜色选择
+      colorOptions.forEach(option => {
+        if (option.dataset.color === selectedColor.value) {
+          option.classList.add('border-primary');
+        } else {
+          option.classList.remove('border-primary');
+        }
+      });
+    }
+    
+    // 模拟获取考勤类型数据
+    function getTypeDataById(typeId) {
+      const typeMap = {
+        'late': {
+          name: '迟到',
+          icon: 'clock-o',
+          color: 'warning',
+          criteria: '上课时间后签到，且未超过10分钟',
+          rules: '迟到≥10分钟自动记为旷课'
+        },
+        'early': {
+          name: '早退',
+          icon: 'sign-out',
+          color: 'warning',
+          criteria: '下课时间前离开，且提前时间超过5分钟',
+          rules: '提前30分钟以上离开视为旷课'
+        },
+        'absent': {
+          name: '旷课',
+          icon: 'times',
+          color: 'danger',
+          criteria: '未签到且无有效请假记录，或迟到超过10分钟',
+          rules: '旷课1次扣除相应学分，累计达到阈值触发预警'
+        },
+        'personal': {
+          name: '事假',
+          icon: 'user-o',
+          color: 'info',
+          criteria: '学生因个人事务请假并获得批准',
+          rules: '每学期事假不得超过5天，需按流程审批'
+        },
+        'sick': {
+          name: '病假',
+          icon: 'medkit',
+          color: 'success',
+          criteria: '学生因病请假并提供医疗证明',
+          rules: '需上传医疗证明，连续病假超过3天需系主任审批'
+        },
+        'official': {
+          name: '公假',
+          icon: 'building-o',
+          color: 'primary',
+          criteria: '因学校或院系安排的公务活动无法上课',
+          rules: '需提供相关部门出具的公假证明，不计入缺勤'
+        }
+      };
+      
+      return typeMap[typeId] || null;
+    }
+    
+    // 事件监听器
+    addTypeBtn.addEventListener('click', () => openModal());
+    closeModal.addEventListener('click', closeTypeModal);
+    cancelBtn.addEventListener('click', closeTypeModal);
+    
+    // 图标选择
+    iconOptions.forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.preventDefault();
+        selectedIcon.value = option.dataset.icon;
+        updateSelectedOptions();
+      });
+    });
+    
+    // 颜色选择
+    colorOptions.forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.preventDefault();
+        selectedColor.value = option.dataset.color;
+        updateSelectedOptions();
+      });
+    });
+    
+    // 编辑按钮
+    editButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const typeId = button.dataset.type;
+        openModal(true, typeId);
+      });
+    });
+    
+    // 删除按钮
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const typeId = button.dataset.type;
+        openDeleteModal(typeId);
+      });
+    });
+    
+    // 取消删除
+    cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+    
+    // 确认删除
+    confirmDeleteBtn.addEventListener('click', () => {
+      // 这里添加删除逻辑
+      closeDeleteModal();
+      showSuccessToast('考勤类型已成功删除');
+    });
+    
+    // 表单提交
+    typeForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // 这里添加表单提交逻辑
+      const message = currentTypeId ? '考勤类型已成功更新' : '新考勤类型已成功添加';
+      closeTypeModal();
+      showSuccessToast(message);
+    });
+    
+    // 点击模态框外部关闭
+    typeModal.addEventListener('click', (e) => {
+      if (e.target === typeModal) {
+        closeTypeModal();
+      }
+    });
+    
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) {
+        closeDeleteModal();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>请假规则设置 - 考勤管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        // 配置Tailwind自定义颜色和字体
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        success: '#52C41A',
+                        warning: '#FAAD14',
+                        danger: '#FF4D4F',
+                        gray: {
+                            100: '#F5F5F5',
+                            200: '#E5E5E5',
+                            300: '#D4D4D4',
+                            400: '#A3A3A3',
+                            500: '#737373',
+                            600: '#525252',
+                            700: '#404040',
+                            800: '#262626',
+                            900: '#171717',
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .transition-height {
+                transition: max-height 0.3s ease-in-out;
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <button id="sidebarToggle" class="lg:hidden text-gray-600 hover:text-primary transition-colors">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-xl font-bold text-primary flex items-center">
+                    <i class="fa fa-graduation-cap mr-2"></i>
+                    考勤管理系统
+                </h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button class="text-gray-600 hover:text-primary transition-colors relative">
+                        <i class="fa fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-danger text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover border-2 border-primary">
+                    <span class="hidden md:inline font-medium">管理员</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- 侧边栏 -->
+        <aside id="sidebar" class="bg-white w-64 shadow-md transform -translate-x-full lg:translate-x-0 fixed lg:static h-[calc(100vh-61px)] z-40 transition-transform duration-300 ease-in-out overflow-y-auto scrollbar-hide">
+            <nav class="py-4">
+                <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    系统设置
+                </div>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-primary/5 hover:text-primary border-l-4 border-transparent hover:border-primary transition-colors">
+                    <i class="fa fa-cog w-5 h-5 mr-3"></i>
+                    <span>基本设置</span>
+                </a>
+                <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-4">
+                    考勤管理
+                </div>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-primary/5 hover:text-primary border-l-4 border-transparent hover:border-primary transition-colors">
+                    <i class="fa fa-list-alt w-5 h-5 mr-3"></i>
+                    <span>考勤类型设置</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-primary/5 hover:text-primary border-l-4 border-transparent hover:border-primary transition-colors">
+                    <i class="fa fa-clock-o w-5 h-5 mr-3"></i>
+                    <span>考勤时段配置</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 bg-primary/10 text-primary border-l-4 border-primary font-medium">
+                    <i class="fa fa-calendar-times-o w-5 h-5 mr-3"></i>
+                    <span>请假规则设置</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-primary/5 hover:text-primary border-l-4 border-transparent hover:border-primary transition-colors">
+                    <i class="fa fa-exclamation-triangle w-5 h-5 mr-3"></i>
+                    <span>考勤异常阈值</span>
+                </a>
+                <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-4">
+                    数据中心
+                </div>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-primary/5 hover:text-primary border-l-4 border-transparent hover:border-primary transition-colors">
+                    <i class="fa fa-bar-chart w-5 h-5 mr-3"></i>
+                    <span>考勤统计报表</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-primary/5 hover:text-primary border-l-4 border-transparent hover:border-primary transition-colors">
+                    <i class="fa fa-download w-5 h-5 mr-3"></i>
+                    <span>数据导出</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-100">
+            <div class="max-w-5xl mx-auto">
+                <!-- 页面标题 -->
+                <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">请假规则设置</h2>
+                        <p class="text-gray-500 mt-1">配置请假相关的规则和审批流程</p>
+                    </div>
+                    <div class="mt-4 md:mt-0 flex space-x-3">
+                        <button id="resetBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors flex items-center">
+                            <i class="fa fa-refresh mr-2"></i>恢复默认
+                        </button>
+                        <button id="saveBtn" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors flex items-center shadow-sm">
+                            <i class="fa fa-save mr-2"></i>保存设置
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 保存成功提示 -->
+                <div id="saveSuccess" class="hidden bg-success/10 border border-success/30 text-success px-4 py-3 rounded-md mb-6 flex items-center">
+                    <i class="fa fa-check-circle mr-2"></i>
+                    <span>设置已成功保存！</span>
+                </div>
+
+                <!-- 基本设置卡片 -->
+                <div class="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i class="fa fa-sliders mr-2 text-primary"></i>基本设置
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <!-- 请假最小单位 -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">请假最小单位</label>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <input type="radio" id="unit1" name="leaveUnit" value="1" class="h-4 w-4 text-primary focus:ring-primary border-gray-300" checked>
+                                    <label for="unit1" class="ml-2 block text-gray-700">1课时（45分钟）</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="unit2" name="leaveUnit" value="4" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                    <label for="unit2" class="ml-2 block text-gray-700">半天（4课时）</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="unit3" name="leaveUnit" value="8" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                    <label for="unit3" class="ml-2 block text-gray-700">1天（8课时）</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="unit4" name="leaveUnit" value="custom" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                    <label for="unit4" class="ml-2 block text-gray-700">自定义：</label>
+                                    <input type="number" min="1" value="2" class="ml-2 w-20 px-3 py-1 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" disabled>
+                                    <span class="ml-2 text-gray-700">课时</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 请假时长限制 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">请假时长限制</label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">单次最长请假</label>
+                                    <div class="flex items-center">
+                                        <input type="number" min="1" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                                        <span class="ml-2 text-gray-700">天</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">默认无限制</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">每月累计最长请假</label>
+                                    <div class="flex items-center">
+                                        <input type="number" min="1" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                                        <span class="ml-2 text-gray-700">天</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">默认无限制</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">每学期累计最长请假</label>
+                                    <div class="flex items-center">
+                                        <input type="number" min="1" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                                        <span class="ml-2 text-gray-700">天</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">默认无限制</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 审批流程设置卡片 -->
+                <div class="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i class="fa fa-random mr-2 text-primary"></i>请假审批流程设置
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <!-- 审批层级配置 -->
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="block text-sm font-medium text-gray-700">审批层级配置</label>
+                                <span class="text-xs text-gray-500">(拖动调整审批顺序)</span>
+                            </div>
+                            <div class="space-y-2" id="approvalSteps">
+                                <div class="flex items-center p-3 border border-gray-200 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors cursor-move">
+                                    <i class="fa fa-bars text-gray-400 mr-3 cursor-grab"></i>
+                                    <input type="checkbox" id="step1" class="h-4 w-4 text-primary focus:ring-primary border-gray-300" checked>
+                                    <label for="step1" class="ml-2 block text-gray-700 flex-1">学生本人提交申请</label>
+                                    <span class="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">必选</span>
+                                </div>
+                                <div class="flex items-center p-3 border border-gray-200 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors cursor-move">
+                                    <i class="fa fa-bars text-gray-400 mr-3 cursor-grab"></i>
+                                    <input type="checkbox" id="step2" class="h-4 w-4 text-primary focus:ring-primary border-gray-300" checked>
+                                    <label for="step2" class="ml-2 block text-gray-700">班主任审核</label>
+                                </div>
+                                <div class="flex items-center p-3 border border-gray-200 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors cursor-move">
+                                    <i class="fa fa-bars text-gray-400 mr-3 cursor-grab"></i>
+                                    <input type="checkbox" id="step3" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                    <label for="step3" class="ml-2 block text-gray-700">辅导员审核</label>
+                                </div>
+                                <div class="flex items-center p-3 border border-gray-200 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors cursor-move">
+                                    <i class="fa fa-bars text-gray-400 mr-3 cursor-grab"></i>
+                                    <input type="checkbox" id="step4" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                    <label for="step4" class="ml-2 block text-gray-700">院系负责人审批</label>
+                                </div>
+                                <div class="flex items-center p-3 border border-gray-200 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors cursor-move">
+                                    <i class="fa fa-bars text-gray-400 mr-3 cursor-grab"></i>
+                                    <input type="checkbox" id="step5" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                    <label for="step5" class="ml-2 block text-gray-700">教务处备案</label>
+                                    <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded ml-2">超过7天需勾选</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 审批时效设置 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">审批时效设置</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">各环节最长审批时间</label>
+                                    <div class="flex items-center">
+                                        <input type="number" min="1" value="24" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                                        <span class="ml-2 text-gray-700">小时</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">超时自动流转下一环节</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">请假申请提前提交时限</label>
+                                    <div class="flex items-center">
+                                        <input type="number" min="0" value="2" class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                                        <span class="ml-2 text-gray-700">小时</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">紧急情况可豁免</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 请假类型附加要求卡片 -->
+                <div class="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i class="fa fa-list-check mr-2 text-primary"></i>请假类型附加要求
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">请假类型</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">附加材料要求</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">特殊审批规则</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- 事假 -->
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <i class="fa fa-user-o text-gray-500 mr-2"></i>
+                                            <div class="text-sm font-medium text-gray-900">事假</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="space-y-2">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="req1-1" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                                <label for="req1-1" class="ml-2 block text-sm text-gray-700">需说明具体事由</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="req1-2" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                                <label for="req1-2" class="ml-2 block text-sm text-gray-700">重要事件需提供证明</label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700 mr-2">超过</span>
+                                            <input type="number" min="1" value="3" class="w-16 px-2 py-1 border border-gray-300 rounded-md text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                                            <span class="text-sm text-gray-700 ml-2 mr-2">天需</span>
+                                            <select class="px-2 py-1 border border-gray-300 rounded-md text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                                                <option>院系审批</option>
+                                                <option>教务处审批</option>
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- 病假 -->
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <i class="fa fa-medkit text-gray-500 mr-2"></i>
+                                            <div class="text-sm font-medium text-gray-900">病假</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="space-y-2">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="req2-1" class="h-4 w-4 text-primary focus:ring-primary border-gray-300" checked>
+                                                <label for="req2-1" class="ml-2 block text-sm text-gray-700">必须上传医疗证明</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="req2-2" class="h-4 w-4 text-primary focus:ring-primary border-gray-300" checked>
+                                                <label for="req2-2" class="ml-2 block text-sm text-gray-700">连续3天以上需复查证明</label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700 mr-2">可后补申请（最长</span>
+                                            <input type="number" min="1" value="3" class="w-16 px-2 py-1 border border-gray-300 rounded-md text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                                            <span class="text-sm text-gray-700 ml-2">天）</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- 公假 -->
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <i class="fa fa-building-o text-gray-500 mr-2"></i>
+                                            <div class="text-sm font-medium text-gray-900">公假</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="space-y-2">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="req3-1" class="h-4 w-4 text-primary focus:ring-primary border-gray-300" checked>
+                                                <label for="req3-1" class="ml-2 block text-sm text-gray-700">需上传学校/院系公派证明</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="req3-2" class="h-4 w-4 text-primary focus:ring-primary border-gray-300" checked>
+                                                <label for="req3-2" class="ml-2 block text-sm text-gray-700">需注明公派事件名称</label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-700">自动同步至相关部门</div>
+                                    </td>
+                                </tr>
+                                <!-- 丧假 -->
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <i class="fa fa-heart-o text-gray-500 mr-2"></i>
+                                            <div class="text-sm font-medium text-gray-900">丧假</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="space-y-2">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="req4-1" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                                <label for="req4-1" class="ml-2 block text-sm text-gray-700">需提供亲属关系证明</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="req4-2" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                                <label for="req4-2" class="ml-2 block text-sm text-gray-700">需注明亲属关系</label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-700 mr-2">最长</span>
+                                            <input type="number" min="1" value="3" class="w-16 px-2 py-1 border border-gray-300 rounded-md text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                                            <span class="text-sm text-gray-700 ml-2">天（不含路程）</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- 其他 -->
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <i class="fa fa-ellipsis-h text-gray-500 mr-2"></i>
+                                            <div class="text-sm font-medium text-gray-900">其他</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="space-y-2">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="req5-1" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                                <label for="req5-1" class="ml-2 block text-sm text-gray-700">自定义要求：</label>
+                                                <input type="text" placeholder="请输入要求..." class="ml-2 flex-1 max-w-xs px-2 py-1 border border-gray-300 rounded-md text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" disabled>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <input type="text" placeholder="请输入特殊规则..." class="flex-1 max-w-xs px-2 py-1 border border-gray-300 rounded-md text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 特殊情况设置卡片 -->
+                <div class="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i class="fa fa-exclamation-circle mr-2 text-primary"></i>特殊情况设置
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    <input id="special1" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="special1" class="font-medium text-gray-700">允许事后补假</label>
+                                    <div class="mt-1 flex items-center">
+                                        <span class="text-gray-600 mr-2">最长时限：</span>
+                                        <input type="number" min="1" value="3" class="w-16 px-2 py-1 border border-gray-300 rounded-md text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" disabled>
+                                        <span class="text-gray-600 ml-2">天</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="special2" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300" checked>
+                                <label for="special2" class="ml-3 block text-sm font-medium text-gray-700">
+                                    病假自动顺延课程考核资格
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="special3" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300" checked>
+                                <label for="special3" class="ml-3 block text-sm font-medium text-gray-700">
+                                    公假不计入请假时长统计
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="special4" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300">
+                                <label for="special4" class="ml-3 block text-sm font-medium text-gray-700">
+                                    节假日前后请假需额外审批
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 说明信息卡片 -->
+                <div class="bg-primary/5 rounded-lg border border-primary/20 p-5 mb-6">
+                    <h3 class="text-base font-semibold text-primary mb-3 flex items-center">
+                        <i class="fa fa-info-circle mr-2"></i>设置说明
+                    </h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-0.5 mr-2"></i>
+                            <span>所有带 <span class="inline-flex items-center justify-center w-4 h-4 bg-primary/10 text-primary text-xs rounded-full ml-0.5">✓</span> 的为默认必选设置，可手动取消</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-0.5 mr-2"></i>
+                            <span>审批流程可根据请假时长自动适配（如短时间请假可减少审批环节）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-0.5 mr-2"></i>
+                            <span>设置完成后将应用于所有学生，院系可在本设置基础上增加额外规则</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-primary mt-0.5 mr-2"></i>
+                            <span>变更设置将在 <input type="number" min="1" value="24" class="w-12 mx-1 px-2 py-0.5 border border-gray-300 rounded-md text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"> 小时后生效，此前提交的申请仍按原规则执行</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 底部操作按钮 -->
+                <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 mb-10">
+                    <button id="cancelBtn" class="px-6 py-2.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center">
+                        <i class="fa fa-times mr-2"></i>取消
+                    </button>
+                    <button id="resetBtnBottom" class="px-6 py-2.5 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center">
+                        <i class="fa fa-refresh mr-2"></i>恢复默认
+                    </button>
+                    <button id="saveBtnBottom" class="px-6 py-2.5 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors flex items-center justify-center shadow-sm">
+                        <i class="fa fa-save mr-2"></i>保存设置
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 遮罩层 -->
+    <div id="overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+
+    <!-- 保存确认弹窗 -->
+    <div id="saveModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/50" id="modalOverlay"></div>
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 z-10 transform transition-all">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">保存请假规则设置</h3>
+                <p class="text-gray-600 mb-4">确定要保存当前的请假规则设置吗？设置将在24小时后生效。</p>
+                <div class="flex space-x-3">
+                    <button id="modalCancel" class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        取消
+                    </button>
+                    <button id="modalConfirm" class="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
+                        确认保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 侧边栏切换
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+
+        // 自定义请假单位输入框启用/禁用
+        const unitRadios = document.querySelectorAll('input[name="leaveUnit"]');
+        const customUnitInput = document.querySelector('input[type="number"][disabled]');
+
+        unitRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                customUnitInput.disabled = radio.value !== 'custom';
+                if (radio.value === 'custom') {
+                    customUnitInput.focus();
+                }
+            });
+        });
+
+        // 其他请假要求输入框启用/禁用
+        const otherReqCheckbox = document.getElementById('req5-1');
+        const otherReqInput = document.querySelector('input[placeholder="请输入要求..."]');
+
+        otherReqCheckbox.addEventListener('change', () => {
+            otherReqInput.disabled = !otherReqCheckbox.checked;
+            if (otherReqCheckbox.checked) {
+                otherReqInput.focus();
+            }
+        });
+
+        // 事后补假输入框启用/禁用
+        const afterLeaveCheckbox = document.getElementById('special1');
+        const afterLeaveInput = document.querySelector('input[type="number"][disabled]');
+
+        afterLeaveCheckbox.addEventListener('change', () => {
+            afterLeaveInput.disabled = !afterLeaveCheckbox.checked;
+        });
+
+        // 保存设置相关
+        const saveBtns = [document.getElementById('saveBtn'), document.getElementById('saveBtnBottom')];
+        const saveModal = document.getElementById('saveModal');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const saveSuccess = document.getElementById('saveSuccess');
+
+        saveBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                saveModal.classList.remove('hidden');
+                // 添加动画效果
+                setTimeout(() => {
+                    saveModal.querySelector('div[class*="bg-white"]').classList.add('scale-100');
+                    saveModal.querySelector('div[class*="bg-white"]').classList.remove('scale-95');
+                }, 10);
+            });
+        });
+
+        function closeModal() {
+            saveModal.querySelector('div[class*="bg-white"]').classList.remove('scale-100');
+            saveModal.querySelector('div[class*="bg-white"]').classList.add('scale-95');
+            setTimeout(() => {
+                saveModal.classList.add('hidden');
+            }, 300);
+        }
+
+        modalOverlay.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+
+        modalConfirm.addEventListener('click', () => {
+            closeModal();
+            // 显示保存成功提示
+            saveSuccess.classList.remove('hidden');
+            setTimeout(() => {
+                saveSuccess.classList.add('hidden');
+            }, 3000);
+        });
+
+        // 取消按钮
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            if (confirm('确定要取消设置吗？未保存的更改将会丢失。')) {
+                // 这里可以添加返回上一页的逻辑
+                window.history.back();
+            }
+        });
+
+        // 恢复默认按钮
+        const resetBtns = [document.getElementById('resetBtn'), document.getElementById('resetBtnBottom')];
+        resetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (confirm('确定要恢复默认设置吗？当前设置将会被覆盖。')) {
+                    // 这里可以添加恢复默认设置的逻辑
+                    alert('已恢复默认设置');
+                }
+            });
+        });
+
+        // 实现审批步骤的拖拽功能
+        const approvalSteps = document.getElementById('approvalSteps');
+        let draggableItems = approvalSteps.querySelectorAll('div[class*="cursor-move"]');
+        let draggedItem = null;
+
+        draggableItems.forEach(item => {
+            item.setAttribute('draggable', true);
+            
+            item.addEventListener('dragstart', () => {
+                draggedItem = item;
+                setTimeout(() => {
+                    item.classList.add('opacity-50', 'border-primary');
+                }, 0);
+            });
+            
+            item.addEventListener('dragend', () => {
+                draggedItem = null;
+                item.classList.remove('opacity-50', 'border-primary');
+                draggableItems.forEach(i => i.classList.remove('border-dashed', 'border-primary'));
+            });
+            
+            item.addEventListener('dragover', e => {
+                e.preventDefault();
+            });
+            
+            item.addEventListener('dragenter', e => {
+                e.preventDefault();
+                if (item !== draggedItem) {
+                    item.classList.add('border-dashed', 'border-primary');
+                }
+            });
+            
+            item.addEventListener('dragleave', () => {
+                item.classList.remove('border-dashed', 'border-primary');
+            });
+            
+            item.addEventListener('drop', () => {
+                if (item !== draggedItem) {
+                    const temp = document.createElement('div');
+                    approvalSteps.insertBefore(temp, item);
+                    approvalSteps.insertBefore(item, draggedItem);
+                    approvalSteps.insertBefore(draggedItem, temp);
+                    temp.remove();
+                }
+                item.classList.remove('border-dashed', 'border-primary');
+            });
+        });
+    </script>
+</body>
+</html>
